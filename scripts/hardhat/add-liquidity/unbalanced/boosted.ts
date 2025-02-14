@@ -1,4 +1,4 @@
-// npx hardhat run scripts/hardhat/add-liquidity/boosted.ts
+// npx hardhat run scripts/hardhat/add-liquidity/unbalanced/boosted.ts
 
 import { parseUnits, publicActions } from "viem";
 import { setup } from "../setup";

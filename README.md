@@ -4,12 +4,12 @@ A collection of example scripts for Balancer v3 pool operations.
 
 ## Hardhat
 
+```
+npx hardhat run scripts/hardhat/add-liquidity/unbalanced/boosted.ts
+```
+
 ## Foundry
 
 ```
-anvil --fork-url mainnet
-```
-
-```
-forge script AddLiquidityStandard --rpc-url localhost
+forge script AddLiquidityStandard --fork-url mainnet
 ```
