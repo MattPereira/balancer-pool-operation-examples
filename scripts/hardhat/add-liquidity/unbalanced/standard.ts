@@ -17,7 +17,7 @@ import {
 
 /**
  * Unbalanced add liquidity to a pool with standard tokens
- * @example npx hardhat run scripts/add-liquidity/unbalanced/standard.ts
+ * @example npx hardhat run scripts/hardhat/add-liquidity/unbalanced/standard.ts
  */
 export async function unbalancedAddLiquidityStandard() {
   // User defined inputs
@@ -32,7 +32,7 @@ export async function unbalancedAddLiquidityStandard() {
       rawAmount: parseUnits('1', 18),
     },
     {
-      address: '0x775f661b0bd1739349b9a2a3ef60be277c5d2d29', // wstETH
+      address: '0x775f661b0bd1739349b9a2a3ef60be277c5d2d29', // waEthLidowstETH
       decimals: 18,
       rawAmount: 0n,
     },
@@ -71,6 +71,8 @@ export async function unbalancedAddLiquidityStandard() {
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2(queryOutputWithSlippage, permit2);
+
+  console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,

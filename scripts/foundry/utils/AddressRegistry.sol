@@ -12,5 +12,4 @@ contract AddressRegistry {
     // balancer v3
     address internal router = 0x5C6fb490BDFD3246EB0bB062c168DeCAF4bD9FDd;
     address internal compositeRouter = 0xb21A277466e7dB6934556a1Ce12eb3F032815c8A;
-    address internal Aave_Lido_wETH_wstETH_Pool = 0xc4Ce391d82D164c166dF9c8336DDF84206b2F812;
 }

@@ -3,7 +3,7 @@
 // import {
 //   addLiquidityBoosted,
 //   addLiquidityStandard,
-// } from "../scripts/";
+// } from "../scripts/hardhat/add-liquidity/unbalanced";
 // import { PublicClient } from "viem";
 // describe("Transaction status returned by examples should be success", function () {
 //   let publicClient: PublicClient;

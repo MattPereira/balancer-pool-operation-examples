@@ -14,7 +14,7 @@ import {
 } from '@balancer/sdk';
 
 /**
- * @dev npx hardhat run scripts/add-liquidity/unbalanced/boosted.ts
+ * @dev npx hardhat run scripts/hardhat/add-liquidity/unbalanced/boosted.ts
  */
 export async function unbalancedAddLiquidityBoosted() {
   // User defined inputs
@@ -68,8 +68,6 @@ export async function unbalancedAddLiquidityBoosted() {
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2(queryOutputWithSlippage, permit2);
-
-  console.log(`call.to`, call.to);
 
   console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 

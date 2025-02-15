@@ -8,8 +8,7 @@ import { IPermit2 } from "@permit2/interfaces/IPermit2.sol";
 import { IRouter } from "@balancer-labs/v3-interfaces/contracts/vault/IRouter.sol";
 
 /**
- * Unbalanced add liquidity standard
- * @dev forge script scripts/add-liquidity/unbalanced/Standard.s.sol --fork-url mainnet
+ * @dev forge script scripts/foundry/add-liquidity/unbalanced/Standard.s.sol --fork-url mainnet
  */
 contract Standard is Setup {
     function run() public {
@@ -25,13 +24,12 @@ contract Standard is Setup {
         IPermit2(permit2).approve(waEthLidoWETH, router, type(uint160).max, type(uint48).max);
 
         uint256 bptAmountOut = IRouter(router).addLiquidityUnbalanced(
-            Aave_Lido_wETH_wstETH_Pool,
+            0xc4Ce391d82D164c166dF9c8336DDF84206b2F812, // Aave Lido wETH-wstETH pool
             amountsIn,
             0, // minBptAmountOut
             false, // wethIsEth
             "" // userData
         );
-
         console.log("BPT amount out: %s", bptAmountOut);
     }
 }

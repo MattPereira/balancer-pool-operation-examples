@@ -5,6 +5,11 @@ node_modules
 /cache
 /artifacts
 
+# foundry files
+out/
+broadcast/
+cache_forge/
+
 # TypeChain files
 /typechain
 /typechain-types
@@ -15,8 +20,3 @@ node_modules
 
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
-
-# foundry
-out/
-broadcast/
-cache_forge/

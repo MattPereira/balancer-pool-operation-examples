@@ -8,7 +8,7 @@ import { IPermit2 } from "@permit2/interfaces/IPermit2.sol";
 import { ICompositeLiquidityRouter } from "@balancer-labs/v3-interfaces/contracts/vault/ICompositeLiquidityRouter.sol";
 
 /**
- * @dev forge script scripts/add-liquidity/unbalanced/Boosted.s.sol --fork-url mainnet
+ * @dev forge script scripts/foundry/add-liquidity/unbalanced/Boosted.s.sol --fork-url mainnet
  */
 contract Boosted is Setup {
     function run() public {
@@ -28,14 +28,13 @@ contract Boosted is Setup {
         IPermit2(permit2).approve(wETH, compositeRouter, type(uint160).max, type(uint48).max);
 
         uint256 bptAmountOut = ICompositeLiquidityRouter(compositeRouter).addLiquidityUnbalancedToERC4626Pool(
-            Aave_Lido_wETH_wstETH_Pool,
+            0xc4Ce391d82D164c166dF9c8336DDF84206b2F812, // Aave Lido wETH-wstETH pool
             wrapUnderlying,
             exactAmountsIn,
             0, // minBptAmountOut
             false, // wethIsEth
             "" // userData
         );
-
         console.log("BPT amount out: %s", bptAmountOut);
     }
 }
