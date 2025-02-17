@@ -7,19 +7,17 @@ import { Setup } from "../Setup.sol";
 import { IPermit2 } from "@permit2/interfaces/IPermit2.sol";
 import { ICompositeLiquidityRouter } from "@balancer-labs/v3-interfaces/contracts/vault/ICompositeLiquidityRouter.sol";
 
-/**
- * @dev forge script scripts/foundry/add-liquidity/unbalanced/Boosted.s.sol --fork-url mainnet
- */
+// forge script scripts/foundry/add-liquidity/unbalanced/Boosted.s.sol --fork-url mainnet
 contract Boosted is Setup {
     function run() public {
         setupTokenBalances();
 
         bool[] memory wrapUnderlying = new bool[](2);
-        wrapUnderlying[0] = true; // wrap wETH into waEthLidoWETH
+        wrapUnderlying[0] = true; // wrap wETH into waEthLidowETH
         wrapUnderlying[1] = false;
 
         uint256[] memory exactAmountsIn = new uint256[](2);
-        exactAmountsIn[0] = 1e18; // waEthLidoWETH
+        exactAmountsIn[0] = 1e18; // waEthLidowETH
         exactAmountsIn[1] = 0; // waEthLidowstETH
 
         // Approve permit2 contract on token

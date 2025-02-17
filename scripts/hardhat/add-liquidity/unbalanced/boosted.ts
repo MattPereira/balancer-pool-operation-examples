@@ -13,9 +13,7 @@ import {
   Permit2Helper,
 } from '@balancer/sdk';
 
-/**
- * @dev npx hardhat run scripts/hardhat/add-liquidity/unbalanced/boosted.ts
- */
+// npx hardhat run scripts/hardhat/add-liquidity/unbalanced/boosted.ts
 export async function unbalancedAddLiquidityBoosted() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
@@ -24,7 +22,7 @@ export async function unbalancedAddLiquidityBoosted() {
   const pool = '0xc4Ce391d82D164c166dF9c8336DDF84206b2F812'; // https://balancer.fi/pools/ethereum/v3/0xc4ce391d82d164c166df9c8336ddf84206b2f812
   const amountsIn: InputAmount[] = [
     {
-      address: '0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9', // waEthLidoWETH
+      address: '0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9', // waEthLidowETH
       decimals: 18,
       rawAmount: parseUnits('1', 18),
     },
