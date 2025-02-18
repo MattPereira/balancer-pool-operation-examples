@@ -1,114 +1,97 @@
 import hre from 'hardhat';
-import { getContract, parseAbi, parseEther, formatEther, parseUnits, publicActions } from 'viem';
+import { parseAbi, parseEther, formatEther, parseUnits, publicActions } from 'viem';
 import { wETH, waEthLidowETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '.';
-import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2 } from '@balancer/sdk';
+import {
+  Slippage,
+  Permit2Helper,
+  PERMIT2,
+  AddLiquidityInput,
+  AddLiquidityKind,
+  AddLiquidityBoostedV3,
+  BalancerApi,
+  InputAmount,
+  RemoveLiquidityKind,
+  RemoveLiquidityProportionalInput,
+  RemoveLiquidity,
+  PermitHelper,
+} from '@balancer/sdk';
 /**
- * Before each add liquidity example runs:
- * 1. Deposit some ETH to get wETH (for boosted unbalanced add liquidity)
- * 2. Deposit some wETH into waEthLidowETH (for standard unbalanced add liquidity)
- * 3. Swap some waEthLidowETH for waETHLidowstETH ( for standard proportional add liquidity)
- * 4. swap some waEthLidowstETH for wstETH ( for boosted proportional add liquidity)
- *
- * Default account #0 starts each example with balances for each token usable with the Aave Lido wETH-wstETH Pool:
+ * Default account #0 starts each example with balances for:
  * - wETH (underlying)
  * - waEthLidowETH (erc4626)
  * - wstETH (underlying)
  * - waEthLidowstETH (erc4626)
+ * - aaveLidowETHwstETHPool (BPT)
  */
-export async function setup() {
-  // 1. Deposit ETH into wETH
+export async function setupTokenBalances() {
+  // 1. Deposit ETH (to get wETH)
   await getWeth();
 
-  // 2. Deposit wETH into waEthLidowETH
-  await getAaveWrappedETH();
+  // 2. Unbalanced add wETH to aaveLidowETHwstETHPool (to get BPT)
+  await getBpt();
 
-  // 3. Swap some waEthLidowETH for waETHLidowstETH
-  await getAaveWrappedStakedETH();
+  // 3. Remove liquidity from aaveLidowETHwstETHPool (to get waEthLidowETH and waEthLidowstETH)
+  await getBoostedPoolTokens();
 
-  // 4. Unwrap some waETHLidowstETH for wstETH
+  // 4. Withdraw from waEthLidowstETH Vault ( to get wstETH )
   await getWrappedStakedETH();
+
+  // await logTokenBalances();
 }
 
 async function getWeth() {
   const [walletClient] = await hre.viem.getWalletClients();
 
-  const wethContract = getContract({
-    address: wETH,
-    abi: parseAbi(['function deposit() payable', 'function balanceOf(address account) view returns (uint256)']),
-    client: walletClient,
-  });
-
-  await wethContract.write.deposit({
-    value: parseEther('1000'),
-  });
-  const wethBalance = await wethContract.read.balanceOf([walletClient.account.address]);
-  console.log(`wETH Balance: ${formatEther(wethBalance)}`);
-}
-
-async function getAaveWrappedETH() {
-  const [walletClient] = await hre.viem.getWalletClients();
-
-  // Approve waEthLidowETH contract to spend wETH
   await walletClient.writeContract({
     address: wETH,
-    abi: parseAbi(['function approve(address spender, uint256 amount)']),
-    functionName: 'approve',
-    args: [waEthLidowETH, parseEther('500')],
+    abi: parseAbi(['function deposit() payable']),
+    functionName: 'deposit',
+    value: parseEther('9000'),
   });
-
-  const waEthLidowETHContract = getContract({
-    address: waEthLidowETH,
-    abi: parseAbi([
-      'function deposit(uint256 assets, address receiver)',
-      'function balanceOf(address account) view returns (uint256)',
-    ]),
-    client: walletClient,
-  });
-
-  await waEthLidowETHContract.write.deposit([parseEther('500'), walletClient.account.address]);
-
-  const waEthLidowETHBalance = await waEthLidowETHContract.read.balanceOf([walletClient.account.address]);
-  console.log(`waEthLidowETH Balance: ${formatEther(waEthLidowETHBalance)}`);
 }
 
-async function getAaveWrappedStakedETH() {
-  const [walletClient] = await hre.viem.getWalletClients();
-  const client = walletClient.extend(publicActions);
+export async function getBpt() {
   const chainId = hre.network.config.chainId!;
+  const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const slippage = Slippage.fromPercentage('1');
+  const amountsIn: InputAmount[] = [
+    {
+      address: wETH, // underlying for waEthLidowETH
+      decimals: 18,
+      rawAmount: parseUnits('1000', 18),
+    },
+  ];
+  const slippage = Slippage.fromPercentage('1'); // 1%
 
-  const swapInput = {
+  // Approve the permit2 contract as spender of tokens
+  for (const token of amountsIn) {
+    await approveOnToken(token.address, PERMIT2[chainId], token.rawAmount);
+  }
+
+  const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
+  const poolState = await balancerApi.boostedPools.fetchPoolStateWithUnderlyings(aaveLidowETHwstETHPool);
+
+  const addLiquidityInput: AddLiquidityInput = {
+    amountsIn,
     chainId,
-    swapKind: SwapKind.GivenIn,
-    paths: [
-      {
-        pools: [aaveLidowETHwstETHPool],
-        tokens: [
-          { address: waEthLidowETH, decimals: 18 }, // tokenIn
-          { address: waEthLidowstETH, decimals: 18 }, // tokenOut
-        ],
-        inputAmountRaw: parseUnits('50', 18),
-        outputAmountRaw: parseUnits('50', 18),
-        protocolVersion: 3 as const,
-      },
-    ],
+    rpcUrl,
+    kind: AddLiquidityKind.Unbalanced,
   };
 
-  const swap = new Swap(swapInput);
-  const queryOutput = await swap.query(rpcUrl);
+  // Query addLiquidity to get the amount of BPT out
+  const addLiquidity = new AddLiquidityBoostedV3();
+  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
 
-  // Approve the cannonical Permit2 contract to spend waEthLidowETH
-  await approveOnToken(waEthLidowETH, PERMIT2[chainId], parseEther('100'));
-
-  const permit2 = await Permit2Helper.signSwapApproval({
-    queryOutput,
+  // Use helper to create the necessary permit2 signatures
+  const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
+    ...queryOutput,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
-  const call = swap.buildCallWithPermit2({ queryOutput, slippage }, permit2);
+  // Applies slippage to the BPT out amount and constructs the call
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
 
   await walletClient.sendTransaction({
     account: walletClient.account,
@@ -116,22 +99,55 @@ async function getAaveWrappedStakedETH() {
     to: call.to,
     value: call.value,
   });
-
-  const waEthLidowstETHBalance = await client.readContract({
-    address: waEthLidowstETH,
-    abi: parseAbi(['function balanceOf(address account) view returns (uint256)']),
-    functionName: 'balanceOf',
-    args: [walletClient.account.address],
-  });
-
-  console.log(`waEthLidowstETH Balance: ${formatEther(waEthLidowstETHBalance)}`);
 }
 
-async function getWrappedStakedETH() {
-  // withdraw from waEthLidowstETH contract
-
+export async function getBoostedPoolTokens() {
+  const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
-  const client = walletClient.extend(publicActions);
+  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
+  const kind = RemoveLiquidityKind.Proportional;
+  const bptIn: InputAmount = {
+    rawAmount: parseEther('100'),
+    decimals: 18,
+    address: aaveLidowETHwstETHPool,
+  };
+  const slippage = Slippage.fromPercentage('5'); // 5%
+
+  const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
+  const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
+
+  const removeLiquidityInput: RemoveLiquidityProportionalInput = {
+    chainId,
+    rpcUrl,
+    kind,
+    bptIn,
+  };
+
+  // Query addLiquidity to get the amount of BPT out
+  const removeLiquidity = new RemoveLiquidity();
+  const queryOutput = await removeLiquidity.query(removeLiquidityInput, poolState);
+
+  // Use helper to create the necessary permit2 signatures
+  const permit2 = await PermitHelper.signRemoveLiquidityApproval({
+    ...queryOutput,
+    slippage,
+    client: walletClient.extend(publicActions),
+    owner: walletClient.account,
+  });
+
+  // Applies slippage to the BPT out amount and constructs the call
+  const call = removeLiquidity.buildCallWithPermit({ ...queryOutput, slippage }, permit2);
+
+  await walletClient.sendTransaction({
+    account: walletClient.account,
+    data: call.callData,
+    to: call.to,
+    value: call.value,
+  });
+}
+
+export async function getWrappedStakedETH() {
+  const [walletClient] = await hre.viem.getWalletClients();
 
   await walletClient.writeContract({
     address: waEthLidowstETH,
@@ -139,13 +155,31 @@ async function getWrappedStakedETH() {
     functionName: 'withdraw',
     args: [parseEther('20'), walletClient.account.address, walletClient.account.address],
   });
+}
 
-  const wstETHBalance = await client.readContract({
-    address: wstETH,
-    abi: parseAbi(['function balanceOf(address account) view returns (uint256)']),
-    functionName: 'balanceOf',
-    args: [walletClient.account.address],
-  });
+export async function logTokenBalances() {
+  const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
 
-  console.log(`wstETH Balance: ${formatEther(wstETHBalance)}`);
+  const tokens = [
+    { address: wETH, name: 'wETH' },
+    { address: waEthLidowETH, name: 'waEthLidowETH' },
+    { address: wstETH, name: 'wstETH' },
+    { address: waEthLidowstETH, name: 'waEthLidowstETH' },
+    { address: aaveLidowETHwstETHPool, name: 'aaveLidowETHwstETHPool' },
+  ];
+
+  const balanceAbi = parseAbi(['function balanceOf(address account) view returns (uint256)']);
+
+  await Promise.all(
+    tokens.map(async ({ address, name }) => {
+      const balance = await client.readContract({
+        address,
+        abi: balanceAbi,
+        functionName: 'balanceOf',
+        args: [walletClient.account.address],
+      });
+      console.log(`${name} Balance: ${formatEther(balance)}`);
+    })
+  );
 }

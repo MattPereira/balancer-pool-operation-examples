@@ -1,67 +1,67 @@
 import { parseUnits, publicActions } from 'viem';
-import { setup } from './utils/setup';
-import { approveOnToken, waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool } from './utils';
+import { setupTokenBalances, wETH, wstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
 import hre from 'hardhat';
 
 import {
-  AddLiquidityInput,
   AddLiquidityKind,
-  AddLiquidity,
+  AddLiquidityBoostedV3,
   BalancerApi,
   Slippage,
-  InputAmount,
   Permit2Helper,
+  AddLiquidityBoostedProportionalInput,
+  MAX_UINT256,
   PERMIT2,
 } from '@balancer/sdk';
 
-// npx hardhat run scripts/hardhat/addLiquidityUnbalanced.ts
-export async function addLiquidityUnbalanced() {
+// TODO: figure out error -> https://www.4byte.directory/signatures/?bytes4_signature=0xe2ea151b
+// Reverts because "SwapLimit(uint256,uint256)" ???
+
+// npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626Pool.ts
+export async function addLiquidityProportionalToERC4626Pool() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const amountsIn: InputAmount[] = [
-    {
-      address: waEthLidowETH,
-      decimals: 18,
-      rawAmount: parseUnits('1', 18),
-    },
-    {
-      address: waEthLidowstETH,
-      decimals: 18,
-      rawAmount: 0n,
-    },
-  ];
+  const kind = AddLiquidityKind.Proportional;
+  const tokensIn: `0x${string}`[] = [wETH, wstETH];
+  const referenceAmount = {
+    rawAmount: parseUnits('1', 18),
+    decimals: 18,
+    address: wETH,
+  };
   const slippage = Slippage.fromPercentage('1'); // 1%
 
   // Approve the permit2 contract as spender of tokens
-  for (const token of amountsIn) {
-    await approveOnToken(token.address, PERMIT2[chainId], token.rawAmount);
+  for (const tokenAddress of tokensIn) {
+    await approveOnToken(tokenAddress, PERMIT2[chainId], MAX_UINT256);
   }
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
-  const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
+  const poolState = await balancerApi.boostedPools.fetchPoolStateWithUnderlyings(aaveLidowETHwstETHPool);
 
-  const addLiquidityInput: AddLiquidityInput = {
-    amountsIn,
+  const addLiquidityInput: AddLiquidityBoostedProportionalInput = {
     chainId,
     rpcUrl,
-    kind: AddLiquidityKind.Unbalanced,
+    referenceAmount,
+    tokensIn,
+    kind,
   };
 
   // Query addLiquidity to get the amount of BPT out
-  const addLiquidity = new AddLiquidity();
+  const addLiquidity = new AddLiquidityBoostedV3();
   const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
 
   console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
   // Use helper to create the necessary permit2 signatures
-  const permit2 = await Permit2Helper.signAddLiquidityApproval({
+  const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
     ...queryOutput,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
+
+  console.log('permit2', permit2.batch);
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
@@ -78,8 +78,8 @@ export async function addLiquidityUnbalanced() {
   return hash;
 }
 
-setup()
-  .then(() => addLiquidityUnbalanced())
+setupTokenBalances()
+  .then(() => addLiquidityProportionalToERC4626Pool())
   .then(() => process.exit())
   .catch((error) => {
     console.error(error);

@@ -1,10 +1,9 @@
 import hre from 'hardhat';
-import { waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from './utils';
+import { setupTokenBalances, waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
 import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2 } from '@balancer/sdk';
 import { parseUnits, parseEther, publicActions } from 'viem';
-import { setup } from './utils/setup';
 
-// npx hardhat run scripts/hardhat/swapCustomPath.ts
+// npx hardhat run scripts/hardhat/swap/swapCustomPath.ts
 export async function swapCustomPath() {
   // user defined inputs
   const [walletClient] = await hre.viem.getWalletClients();
@@ -54,7 +53,7 @@ export async function swapCustomPath() {
   return hash;
 }
 
-setup()
+setupTokenBalances()
   .then(() => swapCustomPath())
   .then(() => process.exit())
   .catch((error) => {

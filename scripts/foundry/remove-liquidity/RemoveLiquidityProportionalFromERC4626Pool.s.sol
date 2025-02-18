@@ -7,7 +7,7 @@ import {
 import { console } from "lib/forge-std/src/console.sol";
 import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import { IPermit2 } from "lib/permit2/src/interfaces/IPermit2.sol";
-import { Setup } from "./utils/Setup.sol";
+import { Setup } from "../utils/Setup.sol";
 
 // forge script scripts/foundry/RemoveLiquidityProportionalFromERC4626Pool.s.sol --fork-url mainnet
 contract RemoveLiquidityProportionalFromERC4626Pool is Setup {
