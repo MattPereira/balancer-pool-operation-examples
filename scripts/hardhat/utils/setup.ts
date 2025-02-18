@@ -1,7 +1,7 @@
 import hre from 'hardhat';
 import { getContract, parseAbi, parseEther, formatEther, parseUnits, publicActions } from 'viem';
 import { wETH, waEthLidowETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '.';
-import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2, permit2Abi, BALANCER_ROUTER } from '@balancer/sdk';
+import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2 } from '@balancer/sdk';
 /**
  * Before each add liquidity example runs:
  * 1. Deposit some ETH to get wETH (for boosted unbalanced add liquidity)
@@ -75,7 +75,7 @@ async function getAaveWrappedStakedETH() {
   const [walletClient] = await hre.viem.getWalletClients();
   const client = walletClient.extend(publicActions);
   const chainId = hre.network.config.chainId!;
-  const rpcUrl = hre.config.networks.hardhat.forking?.url!;
+  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const slippage = Slippage.fromPercentage('1');
 
   const swapInput = {

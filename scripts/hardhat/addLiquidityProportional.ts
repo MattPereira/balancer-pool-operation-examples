@@ -1,6 +1,5 @@
-import { parseUnits, publicActions, formatUnits } from 'viem';
-import { setup } from './utils/setup';
-import { approveOnToken, waEthLidowETH, wETH, wstETH, aaveLidowETHwstETHPool } from './utils';
+import { parseUnits, publicActions, formatEther } from 'viem';
+import { setup, approveOnToken, waEthLidowETH, aaveLidowETHwstETHPool } from './utils';
 import hre from 'hardhat';
 
 import {
@@ -14,21 +13,22 @@ import {
   PERMIT2,
 } from '@balancer/sdk';
 
-// npx hardhat run scripts/hardhat/addLiquidityProportional.ts
-
 // TODO: figure out error -> https://www.4byte.directory/signatures/?bytes4_signature=0x8eda85e4
+// Error is AmountInAboveMax ???
+
+// npx hardhat run scripts/hardhat/addLiquidityProportional.ts
 export async function addLiquidityProportional() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
-  const rpcUrl = hre.config.networks.hardhat.forking?.url!;
-
+  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = AddLiquidityKind.Proportional;
   const referenceAmount = {
-    rawAmount: parseUnits('1', 18),
+    rawAmount: parseUnits('1', 18), // shrinking / growing this doesnt change the error
     decimals: 18,
     address: waEthLidowETH,
   };
+  const slippage = Slippage.fromPercentage('1'); // 1%
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
@@ -37,9 +37,6 @@ export async function addLiquidityProportional() {
   for (const token of poolState.tokens) {
     await approveOnToken(token.address, PERMIT2[chainId], MAX_UINT256);
   }
-
-  await approveOnToken(wETH, PERMIT2[chainId], MAX_UINT256);
-  await approveOnToken(wstETH, PERMIT2[chainId], MAX_UINT256);
 
   const addLiquidityInput: AddLiquidityProportionalInput = {
     chainId,
@@ -52,9 +49,12 @@ export async function addLiquidityProportional() {
   const addLiquidity = new AddLiquidity();
   const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
 
-  console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
+  console.log(
+    'queryOutput.amountsIn',
+    queryOutput.amountsIn.map((token) => formatEther(token.amount))
+  );
 
-  const slippage = Slippage.fromPercentage('10'); // 1%
+  console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityApproval({

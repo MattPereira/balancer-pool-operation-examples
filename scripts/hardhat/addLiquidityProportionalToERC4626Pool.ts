@@ -1,6 +1,6 @@
 import { parseUnits, publicActions } from 'viem';
 import { setup } from './utils/setup';
-import { wETH, wstETH, waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from './utils';
+import { wETH, wstETH, aaveLidowETHwstETHPool, approveOnToken } from './utils';
 import hre from 'hardhat';
 
 import {
@@ -14,25 +14,23 @@ import {
   PERMIT2,
 } from '@balancer/sdk';
 
-// npx hardhat run scripts/hardhat/add-liquidity/proportional/boosted.ts
-
 // TODO: figure out error -> https://www.4byte.directory/signatures/?bytes4_signature=0xe2ea151b
+// Reverts because "SwapLimit(uint256,uint256)" ???
+
+// npx hardhat run scripts/hardhat/addLiquidityProportionalToERC4626Pool.ts
 export async function addLiquidityProportionalToERC4626Pool() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
-  const rpcUrl = hre.config.networks.hardhat.forking?.url!;
+  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = AddLiquidityKind.Proportional;
   const tokensIn: `0x${string}`[] = [wETH, wstETH];
   const referenceAmount = {
-    rawAmount: parseUnits('.001', 18),
+    rawAmount: parseUnits('1', 18),
     decimals: 18,
-    address: aaveLidowETHwstETHPool,
+    address: wETH,
   };
   const slippage = Slippage.fromPercentage('1'); // 1%
-
-  console.log('waEthLidowETH', waEthLidowETH);
-  console.log('waEthLidowstETH', waEthLidowstETH);
 
   // Approve the permit2 contract as spender of tokens
   for (const tokenAddress of tokensIn) {
@@ -63,6 +61,8 @@ export async function addLiquidityProportionalToERC4626Pool() {
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
+
+  console.log('permit2', permit2.batch);
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);

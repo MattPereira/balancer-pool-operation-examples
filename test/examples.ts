@@ -1,26 +1,44 @@
-// import { expect } from "chai";
-// import hre from "hardhat";
-// import {
-//   addLiquidityBoosted,
-//   addLiquidityStandard,
-// } from "../scripts/hardhat/add-liquidity/unbalanced";
-// import { PublicClient } from "viem";
-// describe("Transaction status returned by examples should be success", function () {
-//   let publicClient: PublicClient;
+// import { expect } from 'chai';
+// import hre from 'hardhat';
+// import { addLiquidityUnbalanced, addLiquidityUnbalancedToERC4626Pool } from '../scripts/hardhat';
+// import { setup } from '../scripts/hardhat/utils';
+// import { PublicClient } from 'viem';
+// import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 
-//   before(async function () {
-//     publicClient = await hre.viem.getPublicClient();
-//   });
+// describe('Example pool operation scripts', function () {
+//   // let publicClient: PublicClient;
 
-//   it("Add Liquidity Standard", async function () {
-//     const hash = await addLiquidityStandard();
-//     const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
-//     expect(txReceipt.status).to.equal("success");
-//   });
+//   async function deployFixture() {
+//     const publicClient = await hre.viem.getPublicClient();
+//     await setup();
+//     return { publicClient };
+//   }
 
-//   it("Add Liquidity Boosted", async function () {
-//     const hash = await addLiquidityBoosted();
-//     const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
-//     expect(txReceipt.status).to.equal("success");
+//   describe('Add Liquidity', function () {
+//     // it('Proportional Standard', async function () {
+//     //   const hash = await addLiquidityProportional();
+//     //   const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
+//     //   expect(txReceipt.status).to.equal('success');
+//     // });
+
+//     // it('Proportional Boosted', async function () {
+//     //   const hash = await addLiquidityProportionalToERC4626Pool();
+//     //   const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
+//     //   expect(txReceipt.status).to.equal('success');
+//     // });
+
+//     // it('Unbalanced Standard', async function () {
+//     //   const hash = await addLiquidityUnbalanced();
+//     //   const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
+//     //   expect(txReceipt.status).to.equal('success');
+//     // });
+
+//     it('Unbalanced Boosted', async function () {
+//       const { publicClient } = await loadFixture(deployFixture);
+
+//       const hash = await addLiquidityUnbalancedToERC4626Pool();
+//       const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
+//       expect(txReceipt.status).to.equal('success');
+//     });
 //   });
 // });

@@ -14,14 +14,18 @@ contract AddLiquidityProportional is Setup {
 
         // Approve permit2 contract on token
         IERC20(waEthLidowETH).approve(permit2, type(uint256).max);
-        IERC20(waEthLidowstETH).approve(permit2, maxAmountsIn[1]);
+        IERC20(waEthLidowstETH).approve(permit2, type(uint256).max);
         // Approve compositeRouter on Permit2
         IPermit2(permit2).approve(waEthLidowETH, router, type(uint160).max, type(uint48).max);
         IPermit2(permit2).approve(waEthLidowstETH, router, type(uint160).max, type(uint48).max);
 
+        uint256[] memory maxAmountsIn = new uint256[](2);
+        maxAmountsIn[0] = 10e18; // waEthLidowETH
+        maxAmountsIn[1] = 10e18; // waEthLidowstETH
+
         uint256[] memory amountsIn = IRouter(router).addLiquidityProportional(
-            0xc4Ce391d82D164c166dF9c8336DDF84206b2F812, // Aave Lido wETH-wstETH pool
-            [10e18, 10e18], // maxAmountsIn for [waEthLidowETH, waEthLidowstETH]
+            aaveLidowETHwstETHPool, // Aave Lido wETH-wstETH pool
+            maxAmountsIn,
             1e18, // exactBptAmountOut
             false, // wethIsEth
             "" // userData

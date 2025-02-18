@@ -1,6 +1,6 @@
 import { parseUnits, publicActions } from 'viem';
 import { setup } from './utils/setup';
-import { approveOnToken, wETH, wstETH } from './utils';
+import { approveOnToken, wETH, wstETH, aaveLidowETHwstETHPool } from './utils';
 import hre from 'hardhat';
 
 import {
@@ -19,9 +19,7 @@ export async function addLiquidityUnbalancedToERC4626Pool() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
-  const client = walletClient.extend(publicActions);
-  const rpcUrl = hre.config.networks.hardhat.forking?.url!;
-  const pool = '0xc4Ce391d82D164c166dF9c8336DDF84206b2F812'; // https://balancer.fi/pools/ethereum/v3/0xc4ce391d82d164c166df9c8336ddf84206b2f812
+  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const amountsIn: InputAmount[] = [
     {
       address: wETH, // underlying for waEthLidowETH
@@ -42,7 +40,7 @@ export async function addLiquidityUnbalancedToERC4626Pool() {
   }
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
-  const poolState = await balancerApi.boostedPools.fetchPoolStateWithUnderlyings(pool);
+  const poolState = await balancerApi.boostedPools.fetchPoolStateWithUnderlyings(aaveLidowETHwstETHPool);
 
   const addLiquidityInput: AddLiquidityInput = {
     amountsIn,

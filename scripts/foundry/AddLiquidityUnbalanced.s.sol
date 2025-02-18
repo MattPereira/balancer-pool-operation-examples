@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { Setup } from "./Setup.sol";
+import { Setup } from "./utils/Setup.sol";
 import { console } from "lib/forge-std/src/console.sol";
 import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import { IPermit2 } from "lib/permit2/src/interfaces/IPermit2.sol";

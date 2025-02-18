@@ -1,5 +1,5 @@
 import hre from 'hardhat';
-import { wETH, waEthLidowETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from './utils';
+import { waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from './utils';
 import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2 } from '@balancer/sdk';
 import { parseUnits, parseEther, publicActions } from 'viem';
 import { setup } from './utils/setup';
@@ -9,7 +9,7 @@ export async function swapCustomPath() {
   // user defined inputs
   const [walletClient] = await hre.viem.getWalletClients();
   const chainId = hre.network.config.chainId!;
-  const rpcUrl = hre.config.networks.hardhat.forking?.url!;
+  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const slippage = Slippage.fromPercentage('1');
 
   const swapInput = {

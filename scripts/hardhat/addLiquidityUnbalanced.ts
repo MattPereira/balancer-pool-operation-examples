@@ -19,7 +19,7 @@ export async function addLiquidityUnbalanced() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
-  const rpcUrl = hre.config.networks.hardhat.forking?.url!;
+  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const amountsIn: InputAmount[] = [
     {
       address: waEthLidowETH,

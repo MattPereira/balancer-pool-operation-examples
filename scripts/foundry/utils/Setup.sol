@@ -27,14 +27,27 @@ contract Setup is Script, AddressRegistry {
     address internal _alice = makeAddr("alice");
 
     function setupTokenBalances() public {
-        // 1. Deal _alice some ETH
         vm.startPrank(_alice);
         vm.deal(_alice, 100000e18);
 
-        // 2. Deposit ETH into wETH
-        IWETH(wETH).deposit{ value: 10000e18 }();
+        depositETHintoWETH(); // get wETH
 
-        // 3. Use wETH to join the Aave Lido wETH-wstETH pool
+        addLiquidityUnbalancedToERC4626Pool(); // get BPT
+
+        removeLiquidityProportionalFromERC4626Pool(); // get waEthLidowETH and waEthLidowstETH
+
+        withdrawFromWaEthLidowstETH(); // get wstETH
+
+        // logTokenBalances();
+    }
+
+    // 1. Deposit ETH into wETH
+    function depositETHintoWETH() public {
+        IWETH(wETH).deposit{ value: 10000e18 }();
+    }
+
+    // 2. Use wETH to join the Aave Lido wETH-wstETH pool
+    function addLiquidityUnbalancedToERC4626Pool() public {
         IERC20(wETH).approve(permit2, type(uint256).max);
         IPermit2(permit2).approve(wETH, compositeRouter, type(uint160).max, type(uint48).max);
 
@@ -54,8 +67,10 @@ contract Setup is Script, AddressRegistry {
             false, // wethIsEth
             "" // userData
         );
+    }
 
-        // 4. Proportionally remove waEthLidowETH and waEthLidowstETH from the pool
+    // 3. Remove liquidity proportionally from the Aave Lido wETH-wstETH pool
+    function removeLiquidityProportionalFromERC4626Pool() public {
         bool[] memory unwrapWrapped = new bool[](2);
         unwrapWrapped[0] = false;
         unwrapWrapped[1] = false;
@@ -76,14 +91,18 @@ contract Setup is Script, AddressRegistry {
             false, // wethIsEth
             ""
         );
+    }
 
-        // 5. Withdraw from waEthLidowstETH to get wstETH
+    // 4. Withdraw from waEthLidowstETH
+    function withdrawFromWaEthLidowstETH() public {
         IERC4626(waEthLidowstETH).withdraw(20e18, _alice, _alice);
+    }
 
-        // console.log("wETH balance: %s", IERC20(wETH).balanceOf(_alice));
-        // console.log("waEthLidowETH balance: %s", IERC20(waEthLidowETH).balanceOf(_alice));
-        // console.log("wstETH balance: %s", IERC20(wstETH).balanceOf(_alice));
-        // console.log("waEthLidowstETH balance: %s", IERC20(waEthLidowstETH).balanceOf(_alice));
-        // console.log("aaveLidowETHwstETHPool balance: %s", IERC20(aaveLidowETHwstETHPool).balanceOf(_alice));
+    function logTokenBalances() public view {
+        console.log("wETH balance: %s", IERC20(wETH).balanceOf(_alice));
+        console.log("waEthLidowETH balance: %s", IERC20(waEthLidowETH).balanceOf(_alice));
+        console.log("wstETH balance: %s", IERC20(wstETH).balanceOf(_alice));
+        console.log("waEthLidowstETH balance: %s", IERC20(waEthLidowstETH).balanceOf(_alice));
+        console.log("aaveLidowETHwstETHPool balance: %s", IERC20(aaveLidowETHwstETHPool).balanceOf(_alice));
     }
 }
