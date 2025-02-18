@@ -1,25 +1,35 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { Script } from "forge-std/Script.sol";
-import { console } from "forge-std/console.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IERC4626 } from "@openzeppelin/contracts/interfaces/IERC4626.sol";
-import { AddressRegistry } from "../utils/AddressRegistry.sol";
-import { ICompositeLiquidityRouter } from "@balancer-labs/v3-interfaces/contracts/vault/ICompositeLiquidityRouter.sol";
-import { IPermit2 } from "@permit2/interfaces/IPermit2.sol";
+import {
+    ICompositeLiquidityRouter
+} from "lib/balancer-v3-monorepo/pkg/interfaces/contracts/vault/ICompositeLiquidityRouter.sol";
+import { Script } from "lib/forge-std/src/Script.sol";
+import { console } from "lib/forge-std/src/console.sol";
+import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import { IERC4626 } from "lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol";
+import { AddressRegistry } from "./AddressRegistry.sol";
+import { IPermit2 } from "lib/permit2/src/interfaces/IPermit2.sol";
 
 interface IWETH {
     function deposit() external payable;
 }
 
+/**
+ * Before a script runs, give _alice token balances for:
+ * - wETH
+ * - waEthLidowETH
+ * - wstETH
+ * - waEthLidowstETH
+ * - aaveLidowETHwstETHPool
+ */
 contract Setup is Script, AddressRegistry {
-    address internal alice = makeAddr("alice");
+    address internal _alice = makeAddr("alice");
 
     function setupTokenBalances() public {
-        // 1. Deal alice some ETH
-        vm.startPrank(alice);
-        vm.deal(alice, 100000e18);
+        // 1. Deal _alice some ETH
+        vm.startPrank(_alice);
+        vm.deal(_alice, 100000e18);
 
         // 2. Deposit ETH into wETH
         IWETH(wETH).deposit{ value: 10000e18 }();
@@ -68,12 +78,12 @@ contract Setup is Script, AddressRegistry {
         );
 
         // 5. Withdraw from waEthLidowstETH to get wstETH
-        IERC4626(waEthLidowstETH).withdraw(20e18, alice, alice);
+        IERC4626(waEthLidowstETH).withdraw(20e18, _alice, _alice);
 
-        // console.log("wETH balance: %s", IERC20(wETH).balanceOf(alice));
-        // console.log("waEthLidowETH balance: %s", IERC20(waEthLidowETH).balanceOf(alice));
-        // console.log("wstETH balance: %s", IERC20(wstETH).balanceOf(alice));
-        // console.log("waEthLidowstETH balance: %s", IERC20(waEthLidowstETH).balanceOf(alice));
-        // console.log("aaveLidowETHwstETHPool balance: %s", IERC20(aaveLidowETHwstETHPool).balanceOf(alice));
+        // console.log("wETH balance: %s", IERC20(wETH).balanceOf(_alice));
+        // console.log("waEthLidowETH balance: %s", IERC20(waEthLidowETH).balanceOf(_alice));
+        // console.log("wstETH balance: %s", IERC20(wstETH).balanceOf(_alice));
+        // console.log("waEthLidowstETH balance: %s", IERC20(waEthLidowstETH).balanceOf(_alice));
+        // console.log("aaveLidowETHwstETHPool balance: %s", IERC20(aaveLidowETHwstETHPool).balanceOf(_alice));
     }
 }

@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import { getContract, parseAbi, parseEther, formatEther, parseUnits, publicActions } from 'viem';
-import { wETH, waEthLidowETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils/';
+import { wETH, waEthLidowETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '.';
 import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2, permit2Abi, BALANCER_ROUTER } from '@balancer/sdk';
 /**
  * Before each add liquidity example runs:
@@ -9,8 +9,7 @@ import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2, permit2Abi, BALANCER_
  * 3. Swap some waEthLidowETH for waETHLidowstETH ( for standard proportional add liquidity)
  * 4. swap some waEthLidowstETH for wstETH ( for boosted proportional add liquidity)
  *
- * Resulting state:
- * Default account #0 has token balances for:
+ * Default account #0 starts each example with balances for each token usable with the Aave Lido wETH-wstETH Pool:
  * - wETH (underlying)
  * - waEthLidowETH (erc4626)
  * - wstETH (underlying)
@@ -108,8 +107,6 @@ async function getAaveWrappedStakedETH() {
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
-
-  console.log('permit2.details', permit2.batch.details);
 
   const call = swap.buildCallWithPermit2({ queryOutput, slippage }, permit2);
 
