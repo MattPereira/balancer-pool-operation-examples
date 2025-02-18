@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { console } from "forge-std/Script.sol";
+import { console } from "forge-std/console.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Setup } from "../Setup.sol";
 import { IPermit2 } from "@permit2/interfaces/IPermit2.sol";
@@ -30,6 +30,7 @@ contract Standard is Setup {
             false, // wethIsEth
             "" // userData
         );
-        console.log("Amounts in: %s", amountsIn);
+        console.log("Amounts in[0]: %s", amountsIn[0]);
+        console.log("Amounts in[1]: %s", amountsIn[1]);
     }
 }

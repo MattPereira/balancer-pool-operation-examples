@@ -1,12 +1,12 @@
-import type { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox-viem";
-import "@nomicfoundation/hardhat-foundry";
-import * as dotenv from "dotenv";
+import type { HardhatUserConfig } from 'hardhat/config';
+import '@nomicfoundation/hardhat-toolbox-viem';
+import '@nomicfoundation/hardhat-foundry';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "hardhat",
+  defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
       forking: {
@@ -17,10 +17,10 @@ const config: HardhatUserConfig = {
     },
   },
   paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts",
+    sources: './contracts',
+    tests: './test',
+    cache: './cache',
+    artifacts: './artifacts',
   },
 };
 

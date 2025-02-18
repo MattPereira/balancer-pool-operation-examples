@@ -2,6 +2,7 @@ import { parseUnits, publicActions } from 'viem';
 import { setup } from '../setup';
 import { approveOnToken } from '../../utils';
 import hre from 'hardhat';
+import { wETH, wstETH } from '../../utils/';
 
 import {
   AddLiquidityInput,
@@ -11,6 +12,9 @@ import {
   Slippage,
   InputAmount,
   Permit2Helper,
+  PERMIT2,
+  permit2Abi,
+  BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
 } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/add-liquidity/unbalanced/boosted.ts
@@ -18,16 +22,17 @@ export async function unbalancedAddLiquidityBoosted() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url!;
   const pool = '0xc4Ce391d82D164c166dF9c8336DDF84206b2F812'; // https://balancer.fi/pools/ethereum/v3/0xc4ce391d82d164c166df9c8336ddf84206b2f812
   const amountsIn: InputAmount[] = [
     {
-      address: '0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9', // waEthLidowETH
+      address: wETH, // underlying for waEthLidowETH
       decimals: 18,
       rawAmount: parseUnits('1', 18),
     },
     {
-      address: '0x775f661b0bd1739349b9a2a3ef60be277c5d2d29', // wstETH
+      address: wstETH, // underlying for waEthLidowstETH
       decimals: 18,
       rawAmount: 0n,
     },
@@ -36,7 +41,7 @@ export async function unbalancedAddLiquidityBoosted() {
 
   // Approve the permit2 contract as spender of tokens
   for (const token of amountsIn) {
-    await approveOnToken(token.address, token.rawAmount);
+    await approveOnToken(token.address, PERMIT2[chainId], token.rawAmount);
   }
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
@@ -55,17 +60,16 @@ export async function unbalancedAddLiquidityBoosted() {
 
   console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
-  const queryOutputWithSlippage = { ...queryOutput, slippage };
-
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
-    ...queryOutputWithSlippage,
+    ...queryOutput,
+    slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
-  const call = addLiquidity.buildCallWithPermit2(queryOutputWithSlippage, permit2);
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
 
   console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 

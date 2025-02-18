@@ -1,1 +1,2 @@
-export * from "./approveOnToken";
+export * from './approveOnToken';
+export * from './addressRegistry';
