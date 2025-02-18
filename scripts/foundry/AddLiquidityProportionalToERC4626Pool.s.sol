@@ -31,9 +31,9 @@ contract AddLiquidityProportionalToERC4626Pool is Setup {
 
         (address[] memory tokensIn, uint256[] memory amountsIn) = ICompositeLiquidityRouter(compositeRouter)
             .addLiquidityProportionalToERC4626Pool(
-                0xc4Ce391d82D164c166dF9c8336DDF84206b2F812, // Aave Lido wETH-wstETH pool
-                wrapUnderlying, // wrapUnderlying for [wETH, wstETH]
-                maxAmountsIn, // maxAmountsIn for [wETH, wstETH]
+                aaveLidowETHwstETHPool, // pool
+                wrapUnderlying,
+                maxAmountsIn,
                 0.1e18, // exactBptAmountOut
                 false, // wethIsEth
                 "" // userData

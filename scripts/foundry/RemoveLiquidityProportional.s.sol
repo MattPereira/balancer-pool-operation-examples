@@ -20,11 +20,11 @@ contract RemoveLiquidityProportional is Setup {
         minAmountsOut[1] = 0;
 
         uint256[] memory amountsOut = IRouter(router).removeLiquidityProportional(
-            aaveLidowETHwstETHPool,
+            aaveLidowETHwstETHPool, // pool
             1e18, // exactBptAmountIn,
             minAmountsOut,
             false, // wethIsEth
-            ""
+            "" // userData
         );
 
         console.log("Amounts out[0]: %s", amountsOut[0]);

@@ -24,7 +24,7 @@ contract AddLiquidityProportional is Setup {
         maxAmountsIn[1] = 10e18; // waEthLidowstETH
 
         uint256[] memory amountsIn = IRouter(router).addLiquidityProportional(
-            aaveLidowETHwstETHPool, // Aave Lido wETH-wstETH pool
+            aaveLidowETHwstETHPool, // pool
             maxAmountsIn,
             1e18, // exactBptAmountOut
             false, // wethIsEth

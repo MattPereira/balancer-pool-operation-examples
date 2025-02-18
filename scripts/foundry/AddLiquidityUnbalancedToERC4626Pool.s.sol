@@ -28,7 +28,7 @@ contract AddLiquidityUnbalancedToERC4626Pool is Setup {
         exactAmountsIn[1] = 0; // waEthLidowstETH
 
         uint256 bptAmountOut = ICompositeLiquidityRouter(compositeRouter).addLiquidityUnbalancedToERC4626Pool(
-            0xc4Ce391d82D164c166dF9c8336DDF84206b2F812, // Aave Lido wETH-wstETH pool
+            aaveLidowETHwstETHPool, // pool
             wrapUnderlying,
             exactAmountsIn,
             0, // minBptAmountOut

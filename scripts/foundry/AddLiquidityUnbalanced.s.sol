@@ -22,7 +22,7 @@ contract AddLiquidityUnbalanced is Setup {
         amountsIn[1] = 0; // waEthLidowstETH
 
         uint256 bptAmountOut = IRouter(router).addLiquidityUnbalanced(
-            0xc4Ce391d82D164c166dF9c8336DDF84206b2F812, // Aave Lido wETH-wstETH pool
+            aaveLidowETHwstETHPool, // pool
             amountsIn,
             0, // minBptAmountOut
             false, // wethIsEth
