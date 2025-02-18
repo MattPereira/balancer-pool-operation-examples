@@ -5,12 +5,12 @@ import { parseUnits, parseEther, publicActions } from 'viem';
 
 // npx hardhat run scripts/hardhat/swap/swapCustomPath.ts
 export async function swapCustomPath() {
-  // user defined inputs
   const [walletClient] = await hre.viem.getWalletClients();
   const chainId = hre.network.config.chainId!;
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const slippage = Slippage.fromPercentage('1');
 
+  // user defined inputs
+  const slippage = Slippage.fromPercentage('1');
   const swapInput = {
     chainId,
     swapKind: SwapKind.GivenIn,
