@@ -28,13 +28,13 @@ MAINNET_RPC_URL=
 4. Run an example hardhat script
 
 ```
-npx hardhat run scripts/hardhat/<path_to_script>
+npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
 ```
 
 5. Run an example foundry script
 
 ```
-forge script scripts/foundry/<path_to_script> --fork-url mainnet
+forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork-url mainnet
 ```
 
 ## Example Scripts

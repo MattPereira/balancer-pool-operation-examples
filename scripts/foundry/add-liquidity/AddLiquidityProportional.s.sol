@@ -7,7 +7,7 @@ import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.
 import { IPermit2 } from "lib/permit2/src/interfaces/IPermit2.sol";
 import { IRouter } from "lib/balancer-v3-monorepo/pkg/interfaces/contracts/vault/IRouter.sol";
 
-// forge script scripts/foundry/AddLiquidityProportional.s.sol --fork-url mainnet
+// forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork-url mainnet
 contract AddLiquidityProportional is Setup {
     function run() public {
         setupTokenBalances();

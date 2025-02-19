@@ -9,7 +9,7 @@ solc_version = '0.8.26'
 auto_detect_solc = false
 evm_version = 'cancun'
 ignored_error_codes = [2394, 5574, 3860] # Transient storage, code size
-
+fork_block_number = 21834000
 
 [rpc_endpoints]
 localhost = "http://127.0.0.1:8545"

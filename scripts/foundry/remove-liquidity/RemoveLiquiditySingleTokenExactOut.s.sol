@@ -7,7 +7,7 @@ import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.
 import { IPermit2 } from "lib/permit2/src/interfaces/IPermit2.sol";
 import { Setup } from "../utils/Setup.sol";
 
-// forge script scripts/foundry/RemoveLiquiditySingleTokenExactOut.s.sol --fork-url mainnet
+// forge script scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactOut.s.sol --fork-url mainnet
 contract RemoveLiquiditySingleTokenExactOut is Setup {
     function run() public {
         setupTokenBalances();
