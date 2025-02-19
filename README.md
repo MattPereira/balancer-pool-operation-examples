@@ -1,6 +1,6 @@
 # Pool Operation Examples
 
-A collection of example scripts for Balancer v3 pool operations configured to run on a local fork of Ethereum mainnet.
+A collection of hardhat and foundry scripts for Balancer v3 pool operations. All examples are configured to run on a local fork of Ethereum mainnet and use the [Balancer Aave Lido wETH-wstETH pool](https://balancer.fi/pools/ethereum/v3/0xc4ce391d82d164c166df9c8336ddf84206b2f812)
 
 ## Getting Started
 
@@ -16,6 +16,7 @@ foundryup
 git clone https://github.com/MattPereira/balancer-pool-operation-examples.git
 cd balancer-pool-operation-examples
 pnpm install
+forge install
 ```
 
 3. Add a `MAINNET_RPC_URL` to a `.env` file
@@ -30,7 +31,7 @@ MAINNET_RPC_URL=
 npx hardhat run scripts/hardhat/<path_to_script>
 ```
 
-1. Run an example foundry script
+5. Run an example foundry script
 
 ```
 forge script scripts/foundry/<path_to_script> --fork-url mainnet
