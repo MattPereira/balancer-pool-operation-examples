@@ -37,7 +37,9 @@ npx hardhat run scripts/hardhat/<path_to_script>
 forge script scripts/foundry/<path_to_script> --fork-url mainnet
 ```
 
-## Add Liquidity
+## Example Scripts
+
+### Add Liquidity
 
 <table>
   <tr>
@@ -65,7 +67,7 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
   </tr>
 </table>
 
-## Remove Liquidity
+### Remove Liquidity
 
 <table>
   <thead>
@@ -96,7 +98,7 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
   </tbody>
 </table>
 
-## Swap
+### Swap
 
 <table>
   <tr>
