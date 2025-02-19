@@ -41,22 +41,6 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
 
 ### Add Liquidity
 
-- Unbalanced
-  - Typescript
-    - <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a>
-    - <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a>
-  - Solidity
-    - <a href="scripts/foundry/add-liquidity/AddLiquidityUnbalanced.s.sol">AddLiquidityUnbalanced.s.sol</a>
-    - <a href="scripts/foundry/add-liquidity/addLiquidityUnbalancedToERC4626.s.sol">AddLiquidityUnbalancedToERC4626.s.sol</a>
-- Proportional
-
-  - Typescript
-    - <a href="scripts/hardhat/add-liquidity/addLiquidityProportional.ts">addLiquidityProportional.ts</a>
-    - <a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626.ts">addLiquidityProportionalToERC4626.ts</a>
-  - Solidity
-    - <a href="scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol">AddLiquidityProportional.s.sol</a>
-    - <a href="scripts/foundry/add-liquidity/AddLiquidityProportionalToERC4626.s.sol">AddLiquidityProportionalToERC4626.s.sol</a>
-
   <table>
     <tr>
       <th>Kind</th>
