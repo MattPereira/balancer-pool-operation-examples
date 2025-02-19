@@ -55,6 +55,20 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
   </tr>
 </table>
 
+<table>
+  <tr>
+  <th>Typescript</th>
+    <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a></td>
+    <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a></td>
+
+  </tr>
+  <tr>
+  <th>Solidity</th>
+    <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalanced.s.sol">addLiquidityUnbalanced.s.sol</a></td>
+    <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalancedToERC4626.s.sol">addLiquidityUnbalancedToERC4626.s.sol</a></td>
+  </tr>
+</table>
+
 ### Proportional
 
 <table>
