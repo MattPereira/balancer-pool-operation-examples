@@ -32,6 +32,7 @@ npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
 ```
 
 5. Run an example foundry script
+   > Foundry script execution requires the `--fork-url mainnet` flag
 
 ```
 forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork-url mainnet
