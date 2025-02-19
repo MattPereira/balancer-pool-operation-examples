@@ -1,4 +1,4 @@
-# Pool Operation Examples
+# Balancer V3 Pool Operation Examples
 
 A collection of hardhat and foundry scripts for Balancer v3 pool operations. All examples are configured to run on a local fork of Ethereum mainnet and use the [Balancer Aave Lido wETH-wstETH pool](https://balancer.fi/pools/ethereum/v3/0xc4ce391d82d164c166df9c8336ddf84206b2f812)
 
