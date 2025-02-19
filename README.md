@@ -31,12 +31,13 @@ MAINNET_RPC_URL=
 npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
 ```
 
-5. Run an example foundry script
-   > Foundry script execution requires the `--fork-url mainnet` flag
+5. Run an example foundry script\*
 
 ```
 forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork-url mainnet
 ```
+
+> \*Foundry script execution requires the `--fork-url mainnet` flag
 
 ## Example Scripts
 
