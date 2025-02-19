@@ -47,20 +47,20 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
   <tr>
     <th rowspan="2">Unbalanced</th>
     <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a></td>
-    <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalanced.s.sol">addLiquidityUnbalanced.s.sol</a></td>
+    <td><a href="scripts/foundry/add-liquidity/AddLiquidityUnbalanced.s.sol">AddLiquidityUnbalanced.s.sol</a></td>
   </tr>
   <tr>
     <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a></td>
-    <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalancedToERC4626.s.sol">addLiquidityUnbalancedToERC4626.s.sol</a></td>
+    <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalancedToERC4626.s.sol">AddLiquidityUnbalancedToERC4626.s.sol</a></td>
   </tr>
     <tr>
     <th rowspan="2">Proportional</th>
     <td><a href="scripts/hardhat/add-liquidity/addLiquidityProportional.ts">addLiquidityProportional.ts</a></td>
-    <td><a href="scripts/foundry/add-liquidity/addLiquidityProportional.s.sol">addLiquidityProportional.s.sol</a></td>
+    <td><a href="scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol">AddLiquidityProportional.s.sol</a></td>
   </tr>
   <tr>
     <td><a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626.ts">addLiquidityProportionalToERC4626.ts</a></td>
-    <td><a href="scripts/foundry/add-liquidity/addLiquidityProportionalToERC4626.s.sol">addLiquidityProportionalToERC4626.s.sol</a></td>
+    <td><a href="scripts/foundry/add-liquidity/AddLiquidityProportionalToERC4626.s.sol">AddLiquidityProportionalToERC4626.s.sol</a></td>
   </tr>
 </table>
 
@@ -69,21 +69,27 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
 <table>
   <tr>
     <th>Kind</th>
-    <th>ERC20</th>
-    <th>ERC4626</th>
+    <th>Typescript</th>
+    <th>Solidity</th>
   </tr>
   <tr>
-    <td>Proportional</td>
-    <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a></td>
-    <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a></td>
-  </tr>
-  <tr>
-    <td>SingleTokenExactIn</td>
+    <th>SingleTokenExactIn</th>
     <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a></td>
+    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactIn.s.sol">RemoveLiquiditySingleTokenExactIn.s.sol</a></td>
   </tr>
     <tr>
-    <td>SingleTokenExactOut</td>
+    <th>SingleTokenExactOut</th>
     <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a></td>
+    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactOut.s.sol">RemoveLiquiditySingleTokenExactOut.s.sol</a></td>
+  </tr>
+    <tr>
+    <th rowspan="2">Proportional</th>
+    <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a></td>
+    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportional.s.sol">RemoveLiquidityProportional.s.sol</a></td>
+  </tr>
+  <tr>
+    <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a></td>
+    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportionalToERC4626.s.sol">RemoveLiquidityProportionalToERC4626.s.sol</a></td>
   </tr>
 </table>
 
@@ -96,12 +102,12 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
     <th>Solidity</th>
   </tr>
   <tr>
-    <td>GivenIn</td>
+    <th>GivenIn</th>
     <td>swapSingleTokenExactIn.ts</td>
     <td><a href="scripts/foundry/swap/SwapSingleTokenExactIn.s.sol">SwapSingleTokenExactIn.s.sol</a></td>
   </tr>
   <tr>
-    <td>GivenOut</td>
+    <th>GivenOut</th>
     <td>swapSingleTokenExactOut.ts</td>
     <td><a href="scripts/foundry/swap/SwapSingleTokenExactOut.s.sol">SwapSingleTokenExactOut.s.sol</a></td>
 
