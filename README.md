@@ -67,11 +67,12 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
 ## Remove Liquidity
 
 <table>
-  <tr>
+  <thead>
     <th>Kind</th>
     <th>Typescript</th>
     <th>Solidity</th>
-  </tr>
+  </thead>
+  <tbody>
   <tr>
     <th>SingleTokenExactIn</th>
     <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a></td>
@@ -83,7 +84,7 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
     <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactOut.s.sol">RemoveLiquiditySingleTokenExactOut.s.sol</a></td>
   </tr>
     <tr>
-    <th rowspan="2">Proportional</th>
+    <th style="text-align: left" rowspan="2">Proportional</th>
     <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a></td>
     <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportional.s.sol">RemoveLiquidityProportional.s.sol</a></td>
   </tr>
@@ -91,6 +92,7 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
     <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a></td>
     <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportionalToERC4626.s.sol">RemoveLiquidityProportionalToERC4626.s.sol</a></td>
   </tr>
+  </tbody>
 </table>
 
 ## Swap
