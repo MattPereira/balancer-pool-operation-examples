@@ -13,7 +13,7 @@ foundryup
 2. Clone this repo & install dependencies
 
 ```
-git clone https://github.com/MattPereira/balancer-pool-operation-examples.git
+git clone https://github.com/MattPereira/v3-pool-operation-examples.git
 cd balancer-pool-operation-examples
 pnpm install
 forge install

@@ -16,8 +16,8 @@ import {
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts
 export async function addLiquidityUnbalanced() {
   // User defined inputs
-  const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
+  const chainId = hre.network.config.chainId!;
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const amountsIn: InputAmount[] = [
     {

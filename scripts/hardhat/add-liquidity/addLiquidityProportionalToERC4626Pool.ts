@@ -13,8 +13,7 @@ import {
   PERMIT2,
 } from '@balancer/sdk';
 
-// TODO: figure out error -> https://www.4byte.directory/signatures/?bytes4_signature=0xe2ea151b
-// Reverts because "SwapLimit(uint256,uint256)" ???
+// TODO: figure out revert SwapLimit(uint256,uint256)" -> https://www.4byte.directory/signatures/?bytes4_signature=0xe2ea151b
 
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626Pool.ts
 export async function addLiquidityProportionalToERC4626Pool() {
@@ -25,11 +24,11 @@ export async function addLiquidityProportionalToERC4626Pool() {
   const kind = AddLiquidityKind.Proportional;
   const tokensIn: `0x${string}`[] = [wETH, wstETH];
   const referenceAmount = {
-    rawAmount: parseUnits('1', 18),
+    rawAmount: parseUnits('10', 18),
     decimals: 18,
     address: wETH,
   };
-  const slippage = Slippage.fromPercentage('1'); // 1%
+  const slippage = Slippage.fromPercentage('3'); // 3%
 
   // Approve the permit2 contract as spender of tokens
   for (const tokenAddress of tokensIn) {

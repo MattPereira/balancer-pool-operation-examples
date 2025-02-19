@@ -1,4 +1,4 @@
-import { parseUnits, publicActions, formatEther } from 'viem';
+import { parseUnits, publicActions } from 'viem';
 import { setupTokenBalances, approveOnToken, waEthLidowETH, aaveLidowETHwstETHPool } from '../utils';
 import hre from 'hardhat';
 
@@ -13,9 +13,6 @@ import {
   PERMIT2,
 } from '@balancer/sdk';
 
-// TODO: figure out error -> https://www.4byte.directory/signatures/?bytes4_signature=0x8eda85e4
-// Error is AmountInAboveMax ???
-
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
 export async function addLiquidityProportional() {
   // User defined inputs
@@ -24,11 +21,11 @@ export async function addLiquidityProportional() {
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = AddLiquidityKind.Proportional;
   const referenceAmount = {
-    rawAmount: parseUnits('1', 18), // shrinking / growing this doesnt change the error
+    rawAmount: parseUnits('1', 18),
     decimals: 18,
     address: waEthLidowETH,
   };
-  const slippage = Slippage.fromPercentage('1'); // 1%
+  const slippage = Slippage.fromPercentage('5'); // 5%
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
@@ -48,11 +45,6 @@ export async function addLiquidityProportional() {
   // Query addLiquidity to get the amount of BPT out
   const addLiquidity = new AddLiquidity();
   const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
-
-  console.log(
-    'queryOutput.amountsIn',
-    queryOutput.amountsIn.map((token) => formatEther(token.amount))
-  );
 
   console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 

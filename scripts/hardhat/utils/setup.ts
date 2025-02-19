@@ -15,6 +15,7 @@ import {
   RemoveLiquidity,
   PermitHelper,
 } from '@balancer/sdk';
+
 /**
  * Default account #0 starts each example with balances for:
  * - wETH (underlying)
@@ -25,24 +26,18 @@ import {
  */
 export async function setupTokenBalances() {
   // 1. Deposit ETH (to get wETH)
-  console.log('Depositing ETH to get wETH');
   await getWeth();
 
   // 2. Unbalanced add wETH to aaveLidowETHwstETHPool (to get BPT)
-  console.log('Unbalanced adding wETH to aaveLidowETHwstETHPool (to get BPT)');
   await getBpt();
 
   // 3. Remove liquidity from aaveLidowETHwstETHPool (to get waEthLidowETH and waEthLidowstETH)
-  console.log('Removing liquidity from aaveLidowETHwstETHPool (to get waEthLidowETH and waEthLidowstETH)');
   await getBoostedPoolTokens();
 
   // 4. Withdraw from waEthLidowstETH Vault ( to get wstETH )
-  console.log('Withdrawing from waEthLidowstETH Vault ( to get wstETH )');
   await getWrappedStakedETH();
 
-  // 5. Log token balances
-  console.log('Logging token balances');
-  await logTokenBalances();
+  // await logTokenBalances();
 }
 
 async function getWeth() {
@@ -67,7 +62,7 @@ export async function getBpt() {
       rawAmount: parseUnits('1000', 18),
     },
   ];
-  const slippage = Slippage.fromPercentage('1'); // 1%
+  const slippage = Slippage.fromPercentage('5'); // 5%
 
   // Approve the permit2 contract as spender of tokens
   for (const token of amountsIn) {
@@ -117,7 +112,7 @@ export async function getBoostedPoolTokens() {
     decimals: 18,
     address: aaveLidowETHwstETHPool,
   };
-  const slippage = Slippage.fromPercentage('5'); // 5%
+  const slippage = Slippage.fromPercentage('10'); // TODO: Understand why high slippage required for this proportional remove? Because pool thrown off balance by the huge unbalanced wETH add as part of `getBpt()`?
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
