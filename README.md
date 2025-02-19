@@ -2,7 +2,7 @@
 
 A collection of example scripts for Balancer v3 pool operations configured to run on a local fork of Ethereum mainnet.
 
-## Environment Setup
+## Getting Started
 
 1. Ensure you have the latest version of foundry installed
 
@@ -24,13 +24,13 @@ pnpm install
 MAINNET_RPC_URL=
 ```
 
-## Hardhat scripts
+4. Run an example hardhat script
 
 ```
 npx hardhat run scripts/hardhat/<path_to_script>
 ```
 
-## Foundry scripts
+1. Run an example foundry script
 
 ```
 forge script scripts/foundry/<path_to_script> --fork-url mainnet
@@ -73,25 +73,25 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
     <th>Solidity</th>
   </thead>
   <tbody>
-  <tr>
-    <th>SingleTokenExactIn</th>
-    <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a></td>
-    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactIn.s.sol">RemoveLiquiditySingleTokenExactIn.s.sol</a></td>
-  </tr>
     <tr>
-    <th>SingleTokenExactOut</th>
-    <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a></td>
-    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactOut.s.sol">RemoveLiquiditySingleTokenExactOut.s.sol</a></td>
-  </tr>
+        <th>SingleTokenExactIn</th>
+        <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a></td>
+        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactIn.s.sol">RemoveLiquiditySingleTokenExactIn.s.sol</a></td>
+    </tr>
+        <tr>
+        <th>SingleTokenExactOut</th>
+        <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a></td>
+        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactOut.s.sol">RemoveLiquiditySingleTokenExactOut.s.sol</a></td>
+    </tr>
+        <tr>
+        <th rowspan="2">Proportional</th>
+        <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a></td>
+        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportional.s.sol">RemoveLiquidityProportional.s.sol</a></td>
+    </tr>
     <tr>
-    <th style="text-align: left" rowspan="2">Proportional</th>
-    <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a></td>
-    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportional.s.sol">RemoveLiquidityProportional.s.sol</a></td>
-  </tr>
-  <tr>
-    <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a></td>
-    <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportionalToERC4626.s.sol">RemoveLiquidityProportionalToERC4626.s.sol</a></td>
-  </tr>
+        <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a></td>
+        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportionalToERC4626.s.sol">RemoveLiquidityProportionalToERC4626.s.sol</a></td>
+    </tr>
   </tbody>
 </table>
 
