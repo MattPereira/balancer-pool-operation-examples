@@ -38,21 +38,37 @@ forge script scripts/foundry/<path_to_script> --fork-url mainnet
 
 ## Add Liquidity
 
+### Unbalanced
+
 <table>
   <tr>
-    <th>Kind</th>
-    <th>ERC20</th>
-    <th>ERC4626</th>
+    <th>Typescript</th>
+    <th>Solidity</th>
   </tr>
   <tr>
-    <td>Unbalanced</td>
     <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a></td>
-    <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a></td>
+    <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalanced.s.sol">addLiquidityUnbalanced.s.sol</a></td>
   </tr>
   <tr>
-    <td>Proportional</td>
+    <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a></td>
+    <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalancedToERC4626.s.sol">addLiquidityUnbalancedToERC4626.s.sol</a></td>
+  </tr>
+</table>
+
+### Proportional
+
+<table>
+  <tr>
+    <th>Typescript</th>
+    <th>Solidity</th>
+  </tr>
+  <tr>
     <td><a href="scripts/hardhat/add-liquidity/addLiquidityProportional.ts">addLiquidityProportional.ts</a></td>
+    <td><a href="scripts/foundry/add-liquidity/addLiquidityProportional.s.sol">addLiquidityProportional.s.sol</a></td>
+  </tr>
+  <tr>
     <td><a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626.ts">addLiquidityProportionalToERC4626.ts</a></td>
+    <td><a href="scripts/foundry/add-liquidity/addLiquidityProportionalToERC4626.s.sol">addLiquidityProportionalToERC4626.s.sol</a></td>
   </tr>
 </table>
 
