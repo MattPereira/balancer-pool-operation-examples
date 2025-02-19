@@ -13,11 +13,10 @@ import {
 
 // npx hardhat run scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts
 export async function removeLiquiditySingleTokenExactIn() {
+  // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-
-  // User defined inputs
   const kind = RemoveLiquidityKind.SingleTokenExactIn;
   const bptIn = {
     rawAmount: parseEther('1'),

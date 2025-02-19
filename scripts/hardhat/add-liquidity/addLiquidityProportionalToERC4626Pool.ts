@@ -13,8 +13,6 @@ import {
   PERMIT2,
 } from '@balancer/sdk';
 
-// TODO: figure out revert SwapLimit(uint256,uint256)" -> https://www.4byte.directory/signatures/?bytes4_signature=0xe2ea151b
-
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626Pool.ts
 export async function addLiquidityProportionalToERC4626Pool() {
   // User defined inputs
@@ -59,8 +57,6 @@ export async function addLiquidityProportionalToERC4626Pool() {
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
-
-  console.log('permit2', permit2.batch);
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);

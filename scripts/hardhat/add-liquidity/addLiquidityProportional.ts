@@ -25,7 +25,7 @@ export async function addLiquidityProportional() {
     decimals: 18,
     address: waEthLidowETH,
   };
-  const slippage = Slippage.fromPercentage('5'); // 5%
+  const slippage = Slippage.fromPercentage('3'); // 3%
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);

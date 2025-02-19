@@ -17,7 +17,6 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const slippage = Slippage.fromPercentage('1'); // 1%
   const kind = RemoveLiquidityKind.Proportional;
   const bptIn = {
     rawAmount: parseEther('1'),
@@ -25,6 +24,7 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
     address: aaveLidowETHwstETHPool,
   };
   const tokensOut = [wETH, wstETH]; // can be underlying or actual pool tokens
+  const slippage = Slippage.fromPercentage('3'); // 3%
 
   const input: RemoveLiquidityBoostedProportionalInput = {
     chainId,
@@ -40,6 +40,13 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
   const removeLiquidityBoosted = new RemoveLiquidityBoostedV3();
   const queryOutput = await removeLiquidityBoosted.query(input, poolState);
 
+  console.log('\nRemove Liquidity Query Output:');
+  console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}`);
+  console.table({
+    tokensOut: queryOutput.amountsOut.map((a) => a.token.address),
+    amountsOut: queryOutput.amountsOut.map((a) => a.amount),
+  });
+
   const permit = await PermitHelper.signRemoveLiquidityBoostedApproval({
     ...queryOutput,
     slippage,
@@ -48,6 +55,13 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
   });
 
   const call = removeLiquidityBoosted.buildCallWithPermit({ ...queryOutput, slippage }, permit);
+
+  console.log('\nWith slippage applied:');
+  console.log(`Max BPT In: ${call.maxBptIn.amount}`);
+  console.table({
+    tokensOut: call.minAmountsOut.map((a) => a.token.address),
+    minAmountsOut: call.minAmountsOut.map((a) => a.amount),
+  });
 
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,

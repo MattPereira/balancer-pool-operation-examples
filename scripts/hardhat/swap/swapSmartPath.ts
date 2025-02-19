@@ -24,6 +24,7 @@ export async function swapSmartPath() {
   const tokenIn = new Token(chainId, waEthLidowETH, 18, 'waEthLidowETH');
   const tokenOut = new Token(chainId, waEthLidowstETH, 18, 'waEthLidowstETH');
   const swapKind = SwapKind.GivenIn;
+  const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
   const slippage = Slippage.fromPercentage('1');
 
   // Approve the cannonical Permit2 contract to spend waEthLidowETH
@@ -36,7 +37,7 @@ export async function swapSmartPath() {
     tokenIn: tokenIn.address,
     tokenOut: tokenOut.address,
     swapKind,
-    swapAmount: TokenAmount.fromHumanAmount(tokenIn, '0.1'),
+    swapAmount,
   });
 
   const swap = new Swap({ chainId, paths, swapKind });
