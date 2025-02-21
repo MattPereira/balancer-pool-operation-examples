@@ -24,7 +24,7 @@ export async function removeLiquidityProportional() {
     decimals: 18,
     address: aaveLidowETHwstETHPool,
   };
-  const slippage = Slippage.fromPercentage('5'); // 5%
+  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);

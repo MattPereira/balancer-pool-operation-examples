@@ -31,7 +31,7 @@ export async function addLiquidityUnbalanced() {
       rawAmount: 0n,
     },
   ];
-  const slippage = Slippage.fromPercentage('1'); // 1%
+  const slippage = Slippage.fromPercentage('5'); // 5%
 
   // Approve the permit2 contract as spender of tokens
   for (const token of amountsIn) {

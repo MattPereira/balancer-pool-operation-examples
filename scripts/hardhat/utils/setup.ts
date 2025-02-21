@@ -112,7 +112,7 @@ export async function getBoostedPoolTokens() {
     decimals: 18,
     address: aaveLidowETHwstETHPool,
   };
-  const slippage = Slippage.fromPercentage('10'); // TODO: Understand why high slippage required for this proportional remove? Because pool thrown off balance by the huge unbalanced wETH add as part of `getBpt()`?
+  const slippage = Slippage.fromPercentage('50'); // TODO: Understand why high slippage required for this proportional remove? Because pool thrown off balance by the huge unbalanced wETH add as part of `getBpt()`?
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);

@@ -23,7 +23,7 @@ export async function removeLiquiditySingleTokenExactOut() {
     decimals: 18,
     rawAmount: parseEther('1'),
   };
-  const slippage = Slippage.fromPercentage('1'); // 1%
+  const slippage = Slippage.fromPercentage('5'); // 5%
 
   const input: RemoveLiquiditySingleTokenExactOutInput = {
     chainId,

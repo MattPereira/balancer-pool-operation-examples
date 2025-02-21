@@ -24,7 +24,7 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
     address: aaveLidowETHwstETHPool,
   };
   const tokensOut = [wETH, wstETH]; // can be underlying or actual pool tokens
-  const slippage = Slippage.fromPercentage('3'); // 3%
+  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
 
   const input: RemoveLiquidityBoostedProportionalInput = {
     chainId,

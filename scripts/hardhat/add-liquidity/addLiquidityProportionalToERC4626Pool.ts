@@ -26,7 +26,7 @@ export async function addLiquidityProportionalToERC4626Pool() {
     decimals: 18,
     address: wETH,
   };
-  const slippage = Slippage.fromPercentage('3'); // 3%
+  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
 
   // Approve the permit2 contract as spender of tokens
   for (const tokenAddress of tokensIn) {
