@@ -49,7 +49,7 @@ export async function removeLiquiditySingleTokenExactIn() {
   });
 
   // Use helper to create the necessary permit2 signatures
-  const permit2 = await PermitHelper.signRemoveLiquidityApproval({
+  const permit = await PermitHelper.signRemoveLiquidityApproval({
     ...queryOutput,
     slippage,
     client: walletClient.extend(publicActions),
@@ -57,7 +57,7 @@ export async function removeLiquiditySingleTokenExactIn() {
   });
 
   // Applies slippage to the BPT out amount and constructs the call
-  const call = removeLiquidity.buildCallWithPermit({ ...queryOutput, slippage }, permit2);
+  const call = removeLiquidity.buildCallWithPermit({ ...queryOutput, slippage }, permit);
 
   console.log('\nWith slippage applied:');
   console.log(`Max BPT In: ${call.maxBptIn.amount}`);
