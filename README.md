@@ -14,7 +14,7 @@ foundryup
 
 ```
 git clone https://github.com/MattPereira/v3-pool-operation-examples.git
-cd balancer-pool-operation-examples
+cd v3-pool-operation-examples
 pnpm install
 forge install
 ```
