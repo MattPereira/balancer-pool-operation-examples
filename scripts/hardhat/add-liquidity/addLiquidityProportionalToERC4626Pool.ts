@@ -57,7 +57,7 @@ export async function addLiquidityProportionalToERC4626Pool() {
     ...queryOutput,
     amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
       const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
-      return TokenAmount.fromRawAmount(token, amountIn.amount * 2n); // add extra to amounts that are used to calculate "MaxAmountsIn"
+      return TokenAmount.fromRawAmount(token, amountIn.amount * 2n); // add extra to amounts that are used to calculate "MaxAmountsIn" so it doesn't revert `SwapLimit(uint256,uint256)`
     }),
   };
 

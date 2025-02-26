@@ -30,6 +30,7 @@ export async function addLiquidityProportional() {
   };
   const slippage = Slippage.fromPercentage('5'); // 5%
 
+  // Use balancer api to fetch pool state
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
 
