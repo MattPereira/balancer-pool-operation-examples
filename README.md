@@ -13,8 +13,8 @@ foundryup
 2. Clone this repo & install dependencies
 
 ```
-git clone https://github.com/MattPereira/v3-pool-operation-examples.git
-cd v3-pool-operation-examples
+git clone https://github.com/balancer/pool-operation-examples-v3.git
+cd pool-operation-examples-v3
 pnpm install
 forge install
 ```
