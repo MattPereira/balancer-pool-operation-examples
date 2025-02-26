@@ -6,7 +6,7 @@ import {
   addLiquidityUnbalancedToERC4626Pool,
   addLiquidityProportionalToERC4626Pool,
 } from '../scripts/hardhat/add-liquidity';
-import { setupTokenBalances } from '../scripts/hardhat/utils/setup';
+import { getPoolTokenBalances } from '../scripts/hardhat/utils/setup';
 import { PublicClient } from 'viem';
 
 // TODO: figure out how to run basic test that checks if tx returned by each example script is success
@@ -16,7 +16,7 @@ describe('Example pool operation scripts', function () {
 
   before(async function () {
     publicClient = await hre.viem.getPublicClient();
-    await setupTokenBalances();
+    await getPoolTokenBalances();
   });
 
   describe('Add Liquidity', function () {
