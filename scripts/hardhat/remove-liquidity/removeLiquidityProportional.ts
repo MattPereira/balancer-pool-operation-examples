@@ -10,6 +10,9 @@ import {
   PermitHelper,
   RemoveLiquidityProportionalInput,
   InputAmount,
+  TokenAmount,
+  Token,
+  RemoveLiquidityQueryOutput,
 } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts
@@ -24,7 +27,7 @@ export async function removeLiquidityProportional() {
     decimals: 18,
     address: aaveLidowETHwstETHPool,
   };
-  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
+  const slippage = Slippage.fromPercentage('5');
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
@@ -47,16 +50,24 @@ export async function removeLiquidityProportional() {
     amountsOut: queryOutput.amountsOut.map((a) => a.amount),
   });
 
+  const queryOutputWithAdjustedAmounts: RemoveLiquidityQueryOutput = {
+    ...queryOutput,
+    amountsOut: queryOutput.amountsOut.map((amountOut: TokenAmount) => {
+      const token = new Token(amountOut.token.chainId, amountOut.token.address, amountOut.token.decimals);
+      return TokenAmount.fromRawAmount(token, 0n); // Must override minAmountsOut or it causes revert `AmountOutBelowMin(address,uint256,uint256)`
+    }),
+  };
+
   // Use helper to create the necessary permit2 signatures
   const permit = await PermitHelper.signRemoveLiquidityApproval({
-    ...queryOutput,
+    ...queryOutputWithAdjustedAmounts,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
-  const call = removeLiquidity.buildCallWithPermit({ ...queryOutput, slippage }, permit);
+  const call = removeLiquidity.buildCallWithPermit({ ...queryOutputWithAdjustedAmounts, slippage }, permit);
 
   console.log('\nWith slippage applied:');
   console.log(`Max BPT In: ${call.maxBptIn.amount}`);

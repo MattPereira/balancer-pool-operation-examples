@@ -1,20 +1,17 @@
 import hre from 'hardhat';
-import { parseAbi, parseEther, formatEther, parseUnits, publicActions } from 'viem';
+import { parseAbi, parseEther, formatEther, publicActions } from 'viem';
 import { wETH, waEthLidowETH, stETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '.';
 import {
   Slippage,
   Permit2Helper,
   PERMIT2,
-  AddLiquidityInput,
   AddLiquidityKind,
   AddLiquidityBoostedV3,
   BalancerApi,
-  InputAmount,
-  RemoveLiquidityKind,
-  RemoveLiquidityProportionalInput,
-  RemoveLiquidity,
-  PermitHelper,
+  AddLiquidityBoostedQueryOutput,
   MAX_UINT256,
+  TokenAmount,
+  Token,
 } from '@balancer/sdk';
 
 /**
@@ -26,14 +23,16 @@ import {
  * - aaveLidowETHwstETHPool (BPT)
  */
 export async function setupTokenBalances() {
+  // console.log('Setting up token balances...');
   await getUnderlyingPoolTokens();
   await getBoostedPoolTokens();
+  await getBpt();
   // await logTokenBalances();
 }
 
 async function getUnderlyingPoolTokens() {
   const [walletClient] = await hre.viem.getWalletClients();
-  const UNDERLYING_AMOUNT = parseEther('4000');
+  const UNDERLYING_AMOUNT = parseEther('1000');
 
   // Get wETH
   await walletClient.writeContract({
@@ -43,7 +42,7 @@ async function getUnderlyingPoolTokens() {
     value: UNDERLYING_AMOUNT,
   });
 
-  // Get wstETH
+  // Get stETH
   await walletClient.writeContract({
     address: stETH,
     abi: parseAbi(['function submit(address _referral) external payable returns (uint256)']),
@@ -52,12 +51,8 @@ async function getUnderlyingPoolTokens() {
     value: UNDERLYING_AMOUNT,
   });
 
-  await walletClient.writeContract({
-    address: stETH,
-    abi: parseAbi(['function approve(address _spender, uint256 _amount)']),
-    functionName: 'approve',
-    args: [wstETH, UNDERLYING_AMOUNT],
-  });
+  // Get wstETH
+  await approveOnToken(stETH, wstETH, MAX_UINT256);
 
   await walletClient.writeContract({
     address: wstETH,
@@ -69,14 +64,10 @@ async function getUnderlyingPoolTokens() {
 
 async function getBoostedPoolTokens() {
   const [walletClient] = await hre.viem.getWalletClients();
-  const BOOSTED_AMOUNT = parseEther('1000');
+  const BOOSTED_AMOUNT = parseEther('100');
 
-  await walletClient.writeContract({
-    address: wETH,
-    abi: parseAbi(['function approve(address spender, uint256 amount)']),
-    functionName: 'approve',
-    args: [waEthLidowETH, BOOSTED_AMOUNT],
-  });
+  // Get waEthLidowETH
+  await approveOnToken(wETH, waEthLidowETH, MAX_UINT256);
 
   await walletClient.writeContract({
     address: waEthLidowETH,
@@ -85,12 +76,8 @@ async function getBoostedPoolTokens() {
     args: [BOOSTED_AMOUNT, walletClient.account.address],
   });
 
-  await walletClient.writeContract({
-    address: wstETH,
-    abi: parseAbi(['function approve(address spender, uint256 amount)']),
-    functionName: 'approve',
-    args: [waEthLidowstETH, BOOSTED_AMOUNT],
-  });
+  // Get waEthLidowstETH
+  await approveOnToken(wstETH, waEthLidowstETH, MAX_UINT256);
 
   await walletClient.writeContract({
     address: waEthLidowstETH,
@@ -105,7 +92,6 @@ export async function getBpt() {
   const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const tokensIn = [wETH, wstETH];
-
   const referenceAmount = {
     address: wstETH,
     decimals: 18,
@@ -113,7 +99,6 @@ export async function getBpt() {
   };
   const slippage = Slippage.fromPercentage('10'); // 10%
 
-  // Approve the permit2 contract as spender of tokens
   for (const token of tokensIn) {
     await approveOnToken(token, PERMIT2[chainId], MAX_UINT256);
   }
@@ -129,20 +114,25 @@ export async function getBpt() {
     tokensIn,
   } as const;
 
-  // Query addLiquidity to get the amount of BPT out
   const addLiquidity = new AddLiquidityBoostedV3();
   const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
 
-  // Use helper to create the necessary permit2 signatures
-  const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
+  const queryOutputWithAdjustedAmounts: AddLiquidityBoostedQueryOutput = {
     ...queryOutput,
+    amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
+      const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
+      return TokenAmount.fromRawAmount(token, (amountIn.amount * 200n) / 100n); // add extra 70% to amounts that are used to calculate "MaxAmountsIn" (extra 50% not enough?!?)
+    }),
+  };
+
+  const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
+    ...queryOutputWithAdjustedAmounts,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
-  // Applies slippage to the BPT out amount and constructs the call
-  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutputWithAdjustedAmounts, slippage }, permit2);
 
   await walletClient.sendTransaction({
     account: walletClient.account,

@@ -24,7 +24,7 @@ export async function addLiquidityProportional() {
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = AddLiquidityKind.Proportional;
   const referenceAmount = {
-    rawAmount: parseUnits('1', 18),
+    rawAmount: parseUnits('10', 18),
     decimals: 18,
     address: waEthLidowETH,
   };
@@ -55,7 +55,7 @@ export async function addLiquidityProportional() {
     ...queryOutput,
     amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
       const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
-      return TokenAmount.fromRawAmount(token, amountIn.amount * 2n);
+      return TokenAmount.fromRawAmount(token, (amountIn.amount * 170n) / 100n); // add extra 70% to amounts that are used to calculate "MaxAmountsIn" (extra 50% not enough?!?)
     }),
   };
 
