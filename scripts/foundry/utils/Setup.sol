@@ -42,7 +42,7 @@ contract Setup is Script, AddressRegistry {
         getPoolTokenBalances();
         getBptBalance();
 
-        logTokenBalances();
+        // logTokenBalances();
     }
 
     // get wETH and wstETH
