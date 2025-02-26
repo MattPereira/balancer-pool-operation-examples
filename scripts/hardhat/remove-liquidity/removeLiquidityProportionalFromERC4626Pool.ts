@@ -1,5 +1,5 @@
 import { parseEther, publicActions } from 'viem';
-import { setupTokenBalances, aaveLidowETHwstETHPool, wETH, wstETH } from '../utils';
+import { getBptBalance, aaveLidowETHwstETHPool, wETH, wstETH } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -84,7 +84,7 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
   return hash;
 }
 
-setupTokenBalances()
+getBptBalance()
   .then(() => removeLiquidityProportionalFromERC4626Pool())
   .then(() => process.exit())
   .catch((error) => {

@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import { publicActions } from 'viem';
-import { setupTokenBalances, waEthLidowETH, waEthLidowstETH, approveOnToken } from '../utils';
+import { getPoolTokenBalances, waEthLidowETH, waEthLidowstETH, approveOnToken } from '../utils';
 
 import {
   SwapKind,
@@ -80,7 +80,7 @@ export async function swapSmartPath() {
   return hash;
 }
 
-setupTokenBalances()
+getPoolTokenBalances()
   .then(() => swapSmartPath())
   .then(() => process.exit())
   .catch((error) => {

@@ -1,5 +1,5 @@
 import { parseUnits, publicActions } from 'viem';
-import { setupTokenBalances, wETH, wstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
+import { getPoolTokenBalances, wETH, wstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -57,7 +57,7 @@ export async function addLiquidityProportionalToERC4626Pool() {
     ...queryOutput,
     amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
       const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
-      return TokenAmount.fromRawAmount(token, (amountIn.amount * 110n) / 100n); // add extra 10% to amounts that are used to calculate "MaxAmountsIn"
+      return TokenAmount.fromRawAmount(token, amountIn.amount * 2n); // add extra to amounts that are used to calculate "MaxAmountsIn"
     }),
   };
 
@@ -84,7 +84,7 @@ export async function addLiquidityProportionalToERC4626Pool() {
   return hash;
 }
 
-setupTokenBalances()
+getPoolTokenBalances()
   .then(() => addLiquidityProportionalToERC4626Pool())
   .then(() => process.exit())
   .catch((error) => {

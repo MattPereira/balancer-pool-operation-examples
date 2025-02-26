@@ -1,5 +1,5 @@
 import { parseUnits, publicActions } from 'viem';
-import { setupTokenBalances, approveOnToken, waEthLidowETH, aaveLidowETHwstETHPool } from '../utils';
+import { getPoolTokenBalances, approveOnToken, waEthLidowETH, aaveLidowETHwstETHPool } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -82,7 +82,7 @@ export async function addLiquidityProportional() {
   return hash;
 }
 
-setupTokenBalances()
+getPoolTokenBalances()
   .then(() => addLiquidityProportional())
   .then(() => process.exit())
   .catch((error) => {

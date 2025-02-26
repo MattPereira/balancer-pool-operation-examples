@@ -1,5 +1,5 @@
 import { parseUnits, publicActions } from 'viem';
-import { setupTokenBalances, approveOnToken, wETH, wstETH, aaveLidowETHwstETHPool } from '../utils';
+import { getPoolTokenBalances, approveOnToken, wETH, wstETH, aaveLidowETHwstETHPool } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -77,7 +77,7 @@ export async function addLiquidityUnbalancedToERC4626Pool() {
   return hash;
 }
 
-setupTokenBalances()
+getPoolTokenBalances()
   .then(() => addLiquidityUnbalancedToERC4626Pool())
   .then(() => process.exit())
   .catch((error) => {

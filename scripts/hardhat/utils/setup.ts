@@ -1,5 +1,5 @@
 import hre from 'hardhat';
-import { parseAbi, parseEther, formatEther, publicActions } from 'viem';
+import { parseAbi, parseEther, publicActions } from 'viem';
 import { wETH, waEthLidowETH, stETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '.';
 import {
   Slippage,
@@ -14,23 +14,8 @@ import {
   Token,
 } from '@balancer/sdk';
 
-/**
- * Default account #0 starts each example with balances for:
- * - wETH (underlying)
- * - waEthLidowETH (erc4626)
- * - wstETH (underlying)
- * - waEthLidowstETH (erc4626)
- * - aaveLidowETHwstETHPool (BPT)
- */
-export async function setupTokenBalances() {
-  // console.log('Setting up token balances...');
-  await getUnderlyingPoolTokens();
-  await getBoostedPoolTokens();
-  await getBpt();
-  // await logTokenBalances();
-}
-
-async function getUnderlyingPoolTokens() {
+// Get account #0 some wETH and wstETH
+export async function getUnderlyingTokenBalances() {
   const [walletClient] = await hre.viem.getWalletClients();
   const UNDERLYING_AMOUNT = parseEther('1000');
 
@@ -62,9 +47,12 @@ async function getUnderlyingPoolTokens() {
   });
 }
 
-async function getBoostedPoolTokens() {
-  const [walletClient] = await hre.viem.getWalletClients();
+// Get account #0 some waEthLidowETH and waEthLidowstETH
+export async function getPoolTokenBalances() {
   const BOOSTED_AMOUNT = parseEther('100');
+  const [walletClient] = await hre.viem.getWalletClients();
+
+  await getUnderlyingTokenBalances();
 
   // Get waEthLidowETH
   await approveOnToken(wETH, waEthLidowETH, MAX_UINT256);
@@ -87,7 +75,10 @@ async function getBoostedPoolTokens() {
   });
 }
 
-export async function getBpt() {
+// Get account #0 some BPT for aaveLidowETHwstETHPool
+export async function getBptBalance() {
+  await getUnderlyingTokenBalances();
+
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
@@ -142,29 +133,29 @@ export async function getBpt() {
   });
 }
 
-export async function logTokenBalances() {
-  const [walletClient] = await hre.viem.getWalletClients();
-  const client = walletClient.extend(publicActions);
+// export async function logTokenBalances() {
+//   const [walletClient] = await hre.viem.getWalletClients();
+//   const client = walletClient.extend(publicActions);
 
-  const tokens = [
-    { address: wETH, name: 'wETH' },
-    { address: wstETH, name: 'wstETH' },
-    { address: waEthLidowETH, name: 'waEthLidowETH' },
-    { address: waEthLidowstETH, name: 'waEthLidowstETH' },
-    { address: aaveLidowETHwstETHPool, name: 'aaveLidowETHwstETHPool' },
-  ];
+//   const tokens = [
+//     { address: wETH, name: 'wETH' },
+//     { address: wstETH, name: 'wstETH' },
+//     { address: waEthLidowETH, name: 'waEthLidowETH' },
+//     { address: waEthLidowstETH, name: 'waEthLidowstETH' },
+//     { address: aaveLidowETHwstETHPool, name: 'aaveLidowETHwstETHPool' },
+//   ];
 
-  const balanceAbi = parseAbi(['function balanceOf(address account) view returns (uint256)']);
+//   const balanceAbi = parseAbi(['function balanceOf(address account) view returns (uint256)']);
 
-  await Promise.all(
-    tokens.map(async ({ address, name }) => {
-      const balance = await client.readContract({
-        address,
-        abi: balanceAbi,
-        functionName: 'balanceOf',
-        args: [walletClient.account.address],
-      });
-      console.log(`${name} Balance: ${formatEther(balance)}`);
-    })
-  );
-}
+//   await Promise.all(
+//     tokens.map(async ({ address, name }) => {
+//       const balance = await client.readContract({
+//         address,
+//         abi: balanceAbi,
+//         functionName: 'balanceOf',
+//         args: [walletClient.account.address],
+//       });
+//       console.log(`${name} Balance: ${formatEther(balance)}`);
+//     })
+//   );
+// }
