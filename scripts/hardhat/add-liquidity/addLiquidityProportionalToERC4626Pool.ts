@@ -1,5 +1,5 @@
 import { parseUnits, publicActions } from 'viem';
-import { setupTokenBalances, wETH, wstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
+import { getPoolTokenBalances, wETH, wstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -11,6 +11,9 @@ import {
   AddLiquidityBoostedProportionalInput,
   MAX_UINT256,
   PERMIT2,
+  TokenAmount,
+  Token,
+  AddLiquidityBoostedQueryOutput,
 } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626Pool.ts
@@ -20,13 +23,13 @@ export async function addLiquidityProportionalToERC4626Pool() {
   const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = AddLiquidityKind.Proportional;
-  const tokensIn: `0x${string}`[] = [wETH, wstETH];
   const referenceAmount = {
-    rawAmount: parseUnits('10', 18),
+    rawAmount: parseUnits('1', 18),
     decimals: 18,
     address: wETH,
   };
-  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
+  const tokensIn: `0x${string}`[] = [wETH, wstETH];
+  const slippage = Slippage.fromPercentage('5');
 
   // Approve the permit2 contract as spender of tokens
   for (const tokenAddress of tokensIn) {
@@ -50,16 +53,24 @@ export async function addLiquidityProportionalToERC4626Pool() {
 
   console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
+  const queryOutputWithAdjustedAmounts: AddLiquidityBoostedQueryOutput = {
+    ...queryOutput,
+    amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
+      const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
+      return TokenAmount.fromRawAmount(token, amountIn.amount * 2n); // add extra to amounts that are used to calculate "MaxAmountsIn" so it doesn't revert `SwapLimit(uint256,uint256)`
+    }),
+  };
+
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
-    ...queryOutput,
+    ...queryOutputWithAdjustedAmounts,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
-  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutputWithAdjustedAmounts, slippage }, permit2);
 
   console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 
@@ -73,7 +84,7 @@ export async function addLiquidityProportionalToERC4626Pool() {
   return hash;
 }
 
-setupTokenBalances()
+getPoolTokenBalances()
   .then(() => addLiquidityProportionalToERC4626Pool())
   .then(() => process.exit())
   .catch((error) => {

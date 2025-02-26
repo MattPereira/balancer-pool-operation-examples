@@ -1,5 +1,5 @@
 import hre from 'hardhat';
-import { setupTokenBalances, waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
+import { getPoolTokenBalances, waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
 import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2 } from '@balancer/sdk';
 import { parseUnits, parseEther, publicActions } from 'viem';
 
@@ -28,11 +28,29 @@ export async function swapCustomPath() {
     ],
   };
 
+  // Approve the cannonical Permit2 contract to spend waEthLidowETH
+  await approveOnToken(waEthLidowETH, PERMIT2[chainId], parseEther('100'));
+
   const swap = new Swap(swapInput);
   const queryOutput = await swap.query(rpcUrl);
 
-  // Approve the cannonical Permit2 contract to spend waEthLidowETH
-  await approveOnToken(waEthLidowETH, PERMIT2[chainId], parseEther('100'));
+  if (queryOutput.swapKind === SwapKind.GivenIn) {
+    console.table([
+      {
+        Type: 'Given Token In',
+        Address: swap.inputAmount.token.address,
+        Amount: swap.inputAmount.amount,
+      },
+    ]);
+  } else {
+    console.table([
+      {
+        Type: 'Expected Amount In',
+        Address: swap.outputAmount.token.address,
+        Amount: swap.outputAmount.amount,
+      },
+    ]);
+  }
 
   const permit2 = await Permit2Helper.signSwapApproval({
     queryOutput,
@@ -53,7 +71,7 @@ export async function swapCustomPath() {
   return hash;
 }
 
-setupTokenBalances()
+getPoolTokenBalances()
   .then(() => swapCustomPath())
   .then(() => process.exit())
   .catch((error) => {

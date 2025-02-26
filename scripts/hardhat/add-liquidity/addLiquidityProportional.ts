@@ -1,5 +1,5 @@
 import { parseUnits, publicActions } from 'viem';
-import { setupTokenBalances, approveOnToken, waEthLidowETH, aaveLidowETHwstETHPool } from '../utils';
+import { getPoolTokenBalances, approveOnToken, waEthLidowETH, aaveLidowETHwstETHPool } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -11,6 +11,9 @@ import {
   MAX_UINT256,
   AddLiquidityProportionalInput,
   PERMIT2,
+  AddLiquidityQueryOutput,
+  TokenAmount,
+  Token,
 } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
@@ -21,12 +24,13 @@ export async function addLiquidityProportional() {
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = AddLiquidityKind.Proportional;
   const referenceAmount = {
-    rawAmount: parseUnits('1', 18),
+    rawAmount: parseUnits('10', 18),
     decimals: 18,
     address: waEthLidowETH,
   };
-  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
+  const slippage = Slippage.fromPercentage('5'); // 5%
 
+  // Use balancer api to fetch pool state
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
 
@@ -48,16 +52,24 @@ export async function addLiquidityProportional() {
 
   console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
+  const queryOutputWithAdjustedAmounts: AddLiquidityQueryOutput = {
+    ...queryOutput,
+    amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
+      const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
+      return TokenAmount.fromRawAmount(token, (amountIn.amount * 170n) / 100n); // add extra 70% to amounts that are used to calculate "MaxAmountsIn" (extra 50% not enough?!?)
+    }),
+  };
+
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityApproval({
-    ...queryOutput,
+    ...queryOutputWithAdjustedAmounts,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
-  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutputWithAdjustedAmounts, slippage }, permit2);
 
   console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 
@@ -71,7 +83,7 @@ export async function addLiquidityProportional() {
   return hash;
 }
 
-setupTokenBalances()
+getPoolTokenBalances()
   .then(() => addLiquidityProportional())
   .then(() => process.exit())
   .catch((error) => {

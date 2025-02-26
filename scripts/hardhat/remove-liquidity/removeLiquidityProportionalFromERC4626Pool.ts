@@ -1,5 +1,5 @@
 import { parseEther, publicActions } from 'viem';
-import { setupTokenBalances, aaveLidowETHwstETHPool, wETH, wstETH } from '../utils';
+import { getBptBalance, aaveLidowETHwstETHPool, wETH, wstETH } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -9,6 +9,9 @@ import {
   Slippage,
   PermitHelper,
   RemoveLiquidityBoostedProportionalInput,
+  TokenAmount,
+  Token,
+  RemoveLiquidityBoostedQueryOutput,
 } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/remove-liquidity/removeLiquidityProportionalFromERC4626Pool.ts
@@ -24,7 +27,7 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
     address: aaveLidowETHwstETHPool,
   };
   const tokensOut = [wETH, wstETH]; // can be underlying or actual pool tokens
-  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
+  const slippage = Slippage.fromPercentage('5'); // 5%
 
   const input: RemoveLiquidityBoostedProportionalInput = {
     chainId,
@@ -47,14 +50,22 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
     amountsOut: queryOutput.amountsOut.map((a) => a.amount),
   });
 
-  const permit = await PermitHelper.signRemoveLiquidityBoostedApproval({
+  const queryOutputWithAdjustedAmounts: RemoveLiquidityBoostedQueryOutput = {
     ...queryOutput,
+    amountsOut: queryOutput.amountsOut.map((amountOut: TokenAmount) => {
+      const token = new Token(amountOut.token.chainId, amountOut.token.address, amountOut.token.decimals);
+      return TokenAmount.fromRawAmount(token, 0n); // Must override minAmountsOut or it causes revert `SwapLimit(uint256,uint256)`
+    }),
+  };
+
+  const permit = await PermitHelper.signRemoveLiquidityBoostedApproval({
+    ...queryOutputWithAdjustedAmounts,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
-  const call = removeLiquidityBoosted.buildCallWithPermit({ ...queryOutput, slippage }, permit);
+  const call = removeLiquidityBoosted.buildCallWithPermit({ ...queryOutputWithAdjustedAmounts, slippage }, permit);
 
   console.log('\nWith slippage applied:');
   console.log(`Max BPT In: ${call.maxBptIn.amount}`);
@@ -73,7 +84,7 @@ export async function removeLiquidityProportionalFromERC4626Pool() {
   return hash;
 }
 
-setupTokenBalances()
+getBptBalance()
   .then(() => removeLiquidityProportionalFromERC4626Pool())
   .then(() => process.exit())
   .catch((error) => {

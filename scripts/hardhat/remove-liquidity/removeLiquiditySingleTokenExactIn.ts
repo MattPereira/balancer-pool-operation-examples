@@ -1,5 +1,5 @@
 import { parseEther, publicActions } from 'viem';
-import { setupTokenBalances, aaveLidowETHwstETHPool, waEthLidowETH } from '../utils';
+import { getBptBalance, aaveLidowETHwstETHPool, waEthLidowETH } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -76,7 +76,7 @@ export async function removeLiquiditySingleTokenExactIn() {
   return hash;
 }
 
-setupTokenBalances()
+getBptBalance()
   .then(() => removeLiquiditySingleTokenExactIn())
   .then(() => process.exit())
   .catch((error) => {
