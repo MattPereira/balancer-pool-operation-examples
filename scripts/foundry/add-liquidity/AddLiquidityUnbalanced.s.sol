@@ -13,7 +13,7 @@ contract AddLiquidityUnbalanced is Setup {
         setupTokenBalances();
 
         // Approve permit2 contract on token
-        IERC20(waEthLidowETH).approve(permit2, amountsIn[0]);
+        IERC20(waEthLidowETH).approve(permit2, type(uint256).max);
         // Approve router on Permit2
         IPermit2(permit2).approve(waEthLidowETH, router, type(uint160).max, type(uint48).max);
 

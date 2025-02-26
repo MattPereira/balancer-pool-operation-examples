@@ -11,17 +11,25 @@ import { IERC4626 } from "lib/openzeppelin-contracts/contracts/interfaces/IERC46
 import { AddressRegistry } from "./AddressRegistry.sol";
 import { IPermit2 } from "lib/permit2/src/interfaces/IPermit2.sol";
 
-interface IWETH {
+interface IwETH {
     function deposit() external payable;
 }
 
+interface IstETH {
+    function submit(address _referral) external payable returns (uint256);
+}
+
+interface IwstETH {
+    function wrap(uint256 _stETHAmount) external returns (uint256);
+}
+
 /**
- * Before a script runs, give _alice token balances for:
- * - wETH
- * - waEthLidowETH
- * - wstETH
- * - waEthLidowstETH
- * - aaveLidowETHwstETHPool
+ * Before a script runs, give _alice balances for:
+ * - wETH (underlying token 1)
+ * - waEthLidowETH (pool token 1)
+ * - wstETH (underlying token 2)
+ * - waEthLidowstETH (pool token 2)
+ * - aaveLidowETHwstETHPool (BPT)
  */
 contract Setup is Script, AddressRegistry {
     address internal _alice = makeAddr("alice");
@@ -30,72 +38,55 @@ contract Setup is Script, AddressRegistry {
         vm.startPrank(_alice);
         vm.deal(_alice, 100000e18);
 
-        depositETHintoWETH(); // get wETH
+        getUnderlyingTokenBalances();
+        getPoolTokenBalances();
+        getBptBalance();
 
-        addLiquidityUnbalancedToERC4626Pool(); // get BPT
-
-        removeLiquidityProportionalFromERC4626Pool(); // get waEthLidowETH and waEthLidowstETH
-
-        withdrawFromWaEthLidowstETH(); // get wstETH
-
-        // logTokenBalances();
+        logTokenBalances();
     }
 
-    // 1. Deposit ETH into wETH
-    function depositETHintoWETH() public {
-        IWETH(wETH).deposit{ value: 10000e18 }();
+    // get wETH and wstETH
+    function getUnderlyingTokenBalances() public {
+        IwETH(wETH).deposit{ value: 10000e18 }(); // get wETH
+
+        IstETH(stETH).submit{ value: 10000e18 }(_alice); // get stETH
+
+        IERC20(stETH).approve(wstETH, type(uint256).max);
+        IwstETH(wstETH).wrap(10000e18); // get wstETH
     }
 
-    // 2. Use wETH to join the Aave Lido wETH-wstETH pool
-    function addLiquidityUnbalancedToERC4626Pool() public {
+    // get waEthLidowETH and waEthLidowstETH
+    function getPoolTokenBalances() public {
+        IERC20(wETH).approve(waEthLidowETH, type(uint256).max);
+        IERC20(wstETH).approve(waEthLidowstETH, type(uint256).max);
+
+        IERC4626(waEthLidowETH).deposit(5000e18, _alice);
+        IERC4626(waEthLidowstETH).deposit(5000e18, _alice);
+    }
+
+    // get BPT for aaveLidowETHwstETHPool
+    function getBptBalance() public {
         IERC20(wETH).approve(permit2, type(uint256).max);
+        IERC20(wstETH).approve(permit2, type(uint256).max);
         IPermit2(permit2).approve(wETH, compositeRouter, type(uint160).max, type(uint48).max);
+        IPermit2(permit2).approve(wstETH, compositeRouter, type(uint160).max, type(uint48).max);
 
         bool[] memory wrapUnderlying = new bool[](2);
-        wrapUnderlying[0] = true;
-        wrapUnderlying[1] = false;
+        wrapUnderlying[0] = true; // wrap wETH into waEthLidowETH
+        wrapUnderlying[1] = true; // wrap wstETH into waEthLidowstETH
 
-        uint256[] memory amountsIn = new uint256[](2);
-        amountsIn[0] = 1000e18;
-        amountsIn[1] = 0;
+        uint256[] memory maxAmountsIn = new uint256[](2);
+        maxAmountsIn[0] = 100e18; // wETH
+        maxAmountsIn[1] = 100e18; // wstETH
 
-        ICompositeLiquidityRouter(compositeRouter).addLiquidityUnbalancedToERC4626Pool(
-            aaveLidowETHwstETHPool,
+        ICompositeLiquidityRouter(compositeRouter).addLiquidityProportionalToERC4626Pool(
+            aaveLidowETHwstETHPool, // pool
             wrapUnderlying,
-            amountsIn,
-            0, // minBptAmountOut
+            maxAmountsIn,
+            5e18, // exactBptAmountOut
             false, // wethIsEth
             "" // userData
         );
-    }
-
-    // 3. Remove liquidity proportionally from the Aave Lido wETH-wstETH pool
-    function removeLiquidityProportionalFromERC4626Pool() public {
-        bool[] memory unwrapWrapped = new bool[](2);
-        unwrapWrapped[0] = false;
-        unwrapWrapped[1] = false;
-
-        uint256 exactBptAmountIn = 888e18;
-
-        uint256[] memory minAmountsOut = new uint256[](2);
-        minAmountsOut[0] = 0;
-        minAmountsOut[1] = 0;
-
-        IERC20(aaveLidowETHwstETHPool).approve(compositeRouter, type(uint256).max);
-
-        ICompositeLiquidityRouter(compositeRouter).removeLiquidityProportionalFromERC4626Pool(
-            aaveLidowETHwstETHPool,
-            unwrapWrapped,
-            exactBptAmountIn, // exactBptAmountIn,
-            minAmountsOut,
-            false, // wethIsEth
-            ""
-        );
-    }
-
-    // 4. Withdraw from waEthLidowstETH
-    function withdrawFromWaEthLidowstETH() public {
-        IERC4626(waEthLidowstETH).withdraw(20e18, _alice, _alice);
     }
 
     function logTokenBalances() public view {

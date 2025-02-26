@@ -15,7 +15,7 @@ contract AddLiquidityUnbalancedToERC4626Pool is Setup {
         setupTokenBalances();
 
         // Approve permit2 contract on token
-        IERC20(wETH).approve(permit2, exactAmountsIn[0]);
+        IERC20(wETH).approve(permit2, type(uint256).max);
         // Approve compositeRouter on Permit2
         IPermit2(permit2).approve(wETH, compositeRouter, type(uint160).max, type(uint48).max);
 

@@ -49,10 +49,10 @@ export async function getUnderlyingTokenBalances() {
 
 // Get account #0 some waEthLidowETH and waEthLidowstETH
 export async function getPoolTokenBalances() {
+  await getUnderlyingTokenBalances();
+
   const BOOSTED_AMOUNT = parseEther('100');
   const [walletClient] = await hre.viem.getWalletClients();
-
-  await getUnderlyingTokenBalances();
 
   // Get waEthLidowETH
   await approveOnToken(wETH, waEthLidowETH, MAX_UINT256);
