@@ -11,6 +11,9 @@ import {
   MAX_UINT256,
   AddLiquidityProportionalInput,
   PERMIT2,
+  AddLiquidityQueryOutput,
+  TokenAmount,
+  Token,
 } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
@@ -25,7 +28,7 @@ export async function addLiquidityProportional() {
     decimals: 18,
     address: waEthLidowETH,
   };
-  const slippage = Slippage.fromPercentage('25'); // 25% TODO: fix insane slippage requirement
+  const slippage = Slippage.fromPercentage('5'); // 5%
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
@@ -48,16 +51,24 @@ export async function addLiquidityProportional() {
 
   console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
+  const queryOutputWithAdjustedAmounts: AddLiquidityQueryOutput = {
+    ...queryOutput,
+    amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
+      const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
+      return TokenAmount.fromRawAmount(token, amountIn.amount * 2n);
+    }),
+  };
+
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityApproval({
-    ...queryOutput,
+    ...queryOutputWithAdjustedAmounts,
     slippage,
     client: walletClient.extend(publicActions),
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
-  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutputWithAdjustedAmounts, slippage }, permit2);
 
   console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 

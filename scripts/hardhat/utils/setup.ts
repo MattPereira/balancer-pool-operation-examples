@@ -26,73 +26,77 @@ import {
  * - aaveLidowETHwstETHPool (BPT)
  */
 export async function setupTokenBalances() {
-  // 1. Deposit ETH (to get wETH)
-  await getWeth();
-
-  // 2. Submit ETH to get stETH and deposit stETH to get wstETH
-  await getWstETH();
-
-  // 3. Proportionally add wETH to wstETH to aaveLidowETHwstETHPool (to get BPT)
-  // await getBpt();
-
-  // // 3. Remove liquidity from aaveLidowETHwstETHPool (to get waEthLidowETH and waEthLidowstETH)
-  // await getBoostedPoolTokens();
-
-  // // 4. Withdraw from waEthLidowstETH Vault ( to get wstETH )
-  // await getWrappedStakedETH();
-
-  await logTokenBalances();
+  await getUnderlyingPoolTokens();
+  await getBoostedPoolTokens();
+  // await logTokenBalances();
 }
 
-async function getWeth() {
+async function getUnderlyingPoolTokens() {
   const [walletClient] = await hre.viem.getWalletClients();
+  const UNDERLYING_AMOUNT = parseEther('4000');
 
+  // Get wETH
   await walletClient.writeContract({
     address: wETH,
     abi: parseAbi(['function deposit() payable']),
     functionName: 'deposit',
-    value: parseEther('4000'),
+    value: UNDERLYING_AMOUNT,
   });
-}
 
-async function getWstETH() {
-  const [walletClient] = await hre.viem.getWalletClients();
-  const publicClient = walletClient.extend(publicActions);
-
+  // Get wstETH
   await walletClient.writeContract({
     address: stETH,
     abi: parseAbi(['function submit(address _referral) external payable returns (uint256)']),
     functionName: 'submit',
     args: [walletClient.account.address],
-    value: parseEther('4000'),
+    value: UNDERLYING_AMOUNT,
   });
 
   await walletClient.writeContract({
     address: stETH,
     abi: parseAbi(['function approve(address _spender, uint256 _amount)']),
     functionName: 'approve',
-    args: [wstETH, parseEther('4000')],
+    args: [wstETH, UNDERLYING_AMOUNT],
   });
 
   await walletClient.writeContract({
     address: wstETH,
     abi: parseAbi(['function wrap(uint256 _stETHAmount) external returns (uint256)']),
     functionName: 'wrap',
-    args: [3999999999999999999000n],
+    args: [UNDERLYING_AMOUNT],
+  });
+}
+
+async function getBoostedPoolTokens() {
+  const [walletClient] = await hre.viem.getWalletClients();
+  const BOOSTED_AMOUNT = parseEther('1000');
+
+  await walletClient.writeContract({
+    address: wETH,
+    abi: parseAbi(['function approve(address spender, uint256 amount)']),
+    functionName: 'approve',
+    args: [waEthLidowETH, BOOSTED_AMOUNT],
+  });
+
+  await walletClient.writeContract({
+    address: waEthLidowETH,
+    abi: parseAbi(['function deposit(uint256 assets, address receiver)']),
+    functionName: 'deposit',
+    args: [BOOSTED_AMOUNT, walletClient.account.address],
   });
 
   await walletClient.writeContract({
     address: wstETH,
     abi: parseAbi(['function approve(address spender, uint256 amount)']),
     functionName: 'approve',
-    args: [waEthLidowstETH, parseEther('2000')],
+    args: [waEthLidowstETH, BOOSTED_AMOUNT],
   });
 
   await walletClient.writeContract({
     address: waEthLidowstETH,
     abi: parseAbi(['function deposit(uint256 assets, address receiver)']),
     functionName: 'deposit',
-    args: [parseEther('2000'), walletClient.account.address],
+    args: [BOOSTED_AMOUNT, walletClient.account.address],
   });
 }
 
@@ -148,70 +152,14 @@ export async function getBpt() {
   });
 }
 
-export async function getBoostedPoolTokens() {
-  const chainId = hre.network.config.chainId!;
-  const [walletClient] = await hre.viem.getWalletClients();
-  const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const kind = RemoveLiquidityKind.Proportional;
-  const bptIn: InputAmount = {
-    rawAmount: parseEther('100'),
-    decimals: 18,
-    address: aaveLidowETHwstETHPool,
-  };
-  const slippage = Slippage.fromPercentage('50'); // TODO: Understand why high slippage required for this proportional remove? Because pool thrown off balance by the huge unbalanced wETH add as part of `getBpt()`?
-
-  const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
-  const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
-
-  const removeLiquidityInput: RemoveLiquidityProportionalInput = {
-    chainId,
-    rpcUrl,
-    kind,
-    bptIn,
-  };
-
-  // Query addLiquidity to get the amount of BPT out
-  const removeLiquidity = new RemoveLiquidity();
-  const queryOutput = await removeLiquidity.query(removeLiquidityInput, poolState);
-
-  // Use helper to create the necessary permit2 signatures
-  const permit2 = await PermitHelper.signRemoveLiquidityApproval({
-    ...queryOutput,
-    slippage,
-    client: walletClient.extend(publicActions),
-    owner: walletClient.account,
-  });
-
-  // Applies slippage to the BPT out amount and constructs the call
-  const call = removeLiquidity.buildCallWithPermit({ ...queryOutput, slippage }, permit2);
-
-  await walletClient.sendTransaction({
-    account: walletClient.account,
-    data: call.callData,
-    to: call.to,
-    value: call.value,
-  });
-}
-
-export async function getWrappedStakedETH() {
-  const [walletClient] = await hre.viem.getWalletClients();
-
-  await walletClient.writeContract({
-    address: waEthLidowstETH,
-    abi: parseAbi(['function withdraw(uint256 assets, address receiver, address owner)']),
-    functionName: 'withdraw',
-    args: [parseEther('20'), walletClient.account.address, walletClient.account.address],
-  });
-}
-
 export async function logTokenBalances() {
   const [walletClient] = await hre.viem.getWalletClients();
   const client = walletClient.extend(publicActions);
 
   const tokens = [
     { address: wETH, name: 'wETH' },
-    { address: waEthLidowETH, name: 'waEthLidowETH' },
     { address: wstETH, name: 'wstETH' },
+    { address: waEthLidowETH, name: 'waEthLidowETH' },
     { address: waEthLidowstETH, name: 'waEthLidowstETH' },
     { address: aaveLidowETHwstETHPool, name: 'aaveLidowETHwstETHPool' },
   ];
@@ -230,10 +178,3 @@ export async function logTokenBalances() {
     })
   );
 }
-
-setupTokenBalances()
-  .then(() => process.exit())
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
