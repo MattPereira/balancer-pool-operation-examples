@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import { parseAbi, parseEther, formatEther, parseUnits, publicActions } from 'viem';
-import { wETH, waEthLidowETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '.';
+import { wETH, waEthLidowETH, stETH, wstETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '.';
 import {
   Slippage,
   Permit2Helper,
@@ -14,6 +14,7 @@ import {
   RemoveLiquidityProportionalInput,
   RemoveLiquidity,
   PermitHelper,
+  MAX_UINT256,
 } from '@balancer/sdk';
 
 /**
@@ -28,16 +29,19 @@ export async function setupTokenBalances() {
   // 1. Deposit ETH (to get wETH)
   await getWeth();
 
-  // 2. Unbalanced add wETH to aaveLidowETHwstETHPool (to get BPT)
+  // 2. Submit ETH to get stETH and deposit stETH to get wstETH
+  await getWstETH();
+
+  // 3. Proportionally add wETH to wstETH to aaveLidowETHwstETHPool (to get BPT)
   await getBpt();
 
-  // 3. Remove liquidity from aaveLidowETHwstETHPool (to get waEthLidowETH and waEthLidowstETH)
-  await getBoostedPoolTokens();
+  // // 3. Remove liquidity from aaveLidowETHwstETHPool (to get waEthLidowETH and waEthLidowstETH)
+  // await getBoostedPoolTokens();
 
-  // 4. Withdraw from waEthLidowstETH Vault ( to get wstETH )
-  await getWrappedStakedETH();
+  // // 4. Withdraw from waEthLidowstETH Vault ( to get wstETH )
+  // await getWrappedStakedETH();
 
-  // await logTokenBalances();
+  await logTokenBalances();
 }
 
 async function getWeth() {
@@ -47,37 +51,74 @@ async function getWeth() {
     address: wETH,
     abi: parseAbi(['function deposit() payable']),
     functionName: 'deposit',
-    value: parseEther('9000'),
+    value: parseEther('4000'),
   });
+}
+
+async function getWstETH() {
+  const [walletClient] = await hre.viem.getWalletClients();
+  const publicClient = walletClient.extend(publicActions);
+
+  await walletClient.writeContract({
+    address: stETH,
+    abi: parseAbi(['function submit(address _referral) external payable returns (uint256)']),
+    functionName: 'submit',
+    args: [walletClient.account.address],
+    value: parseEther('4000'),
+  });
+
+  await walletClient.writeContract({
+    address: stETH,
+    abi: parseAbi(['function approve(address _spender, uint256 _amount)']),
+    functionName: 'approve',
+    args: [wstETH, parseEther('4000')],
+  });
+
+  await walletClient.writeContract({
+    address: wstETH,
+    abi: parseAbi(['function wrap(uint256 _stETHAmount) external returns (uint256)']),
+    functionName: 'wrap',
+    args: [3999999999999999999000n],
+  });
+
+  const wstETHBalance = await publicClient.readContract({
+    address: wstETH,
+    abi: parseAbi(['function balanceOf(address account) view returns (uint256)']),
+    functionName: 'balanceOf',
+    args: [walletClient.account.address],
+  });
+
+  console.log('wstETHBalance', wstETHBalance);
 }
 
 export async function getBpt() {
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const amountsIn: InputAmount[] = [
-    {
-      address: wETH, // underlying for waEthLidowETH
-      decimals: 18,
-      rawAmount: parseUnits('1000', 18),
-    },
-  ];
-  const slippage = Slippage.fromPercentage('5'); // 5%
+  const tokensIn = [wETH, wstETH];
+
+  const referenceAmount = {
+    address: wstETH,
+    decimals: 18,
+    rawAmount: parseEther('10'),
+  };
+  const slippage = Slippage.fromPercentage('10'); // 10%
 
   // Approve the permit2 contract as spender of tokens
-  for (const token of amountsIn) {
-    await approveOnToken(token.address, PERMIT2[chainId], token.rawAmount);
+  for (const token of tokensIn) {
+    await approveOnToken(token, PERMIT2[chainId], MAX_UINT256);
   }
 
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.boostedPools.fetchPoolStateWithUnderlyings(aaveLidowETHwstETHPool);
 
-  const addLiquidityInput: AddLiquidityInput = {
-    amountsIn,
+  const addLiquidityInput = {
     chainId,
     rpcUrl,
-    kind: AddLiquidityKind.Unbalanced,
-  };
+    kind: AddLiquidityKind.Proportional,
+    referenceAmount,
+    tokensIn,
+  } as const;
 
   // Query addLiquidity to get the amount of BPT out
   const addLiquidity = new AddLiquidityBoostedV3();
