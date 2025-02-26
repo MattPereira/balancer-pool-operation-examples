@@ -33,7 +33,7 @@ export async function setupTokenBalances() {
   await getWstETH();
 
   // 3. Proportionally add wETH to wstETH to aaveLidowETHwstETHPool (to get BPT)
-  await getBpt();
+  // await getBpt();
 
   // // 3. Remove liquidity from aaveLidowETHwstETHPool (to get waEthLidowETH and waEthLidowstETH)
   // await getBoostedPoolTokens();
@@ -81,14 +81,19 @@ async function getWstETH() {
     args: [3999999999999999999000n],
   });
 
-  const wstETHBalance = await publicClient.readContract({
+  await walletClient.writeContract({
     address: wstETH,
-    abi: parseAbi(['function balanceOf(address account) view returns (uint256)']),
-    functionName: 'balanceOf',
-    args: [walletClient.account.address],
+    abi: parseAbi(['function approve(address spender, uint256 amount)']),
+    functionName: 'approve',
+    args: [waEthLidowstETH, parseEther('2000')],
   });
 
-  console.log('wstETHBalance', wstETHBalance);
+  await walletClient.writeContract({
+    address: waEthLidowstETH,
+    abi: parseAbi(['function deposit(uint256 assets, address receiver)']),
+    functionName: 'deposit',
+    args: [parseEther('2000'), walletClient.account.address],
+  });
 }
 
 export async function getBpt() {
@@ -225,3 +230,10 @@ export async function logTokenBalances() {
     })
   );
 }
+
+setupTokenBalances()
+  .then(() => process.exit())
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
