@@ -15,7 +15,6 @@ import {
   BalancerApi,
   Slippage,
   Permit2Helper,
-  AddLiquidityBoostedProportionalInput,
   MAX_UINT256,
   PERMIT2,
 } from '@balancer/sdk';
@@ -27,7 +26,7 @@ export async function addLiquidityProportionalToERC4626Pool() {
   const [walletClient] = await hre.viem.getWalletClients();
   const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const kind = AddLiquidityKind.Proportional;
+  const kind = AddLiquidityKind.Proportional as const;
   const referenceAmount = {
     rawAmount: parseUnits('1', 18),
     decimals: 18,
@@ -41,20 +40,15 @@ export async function addLiquidityProportionalToERC4626Pool() {
     await approveOnToken(tokenAddress, PERMIT2[chainId], MAX_UINT256);
   }
 
+  // Use balancer api to fetch pool state
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.boostedPools.fetchPoolStateWithUnderlyings(aaveLidowETHwstETHPool);
 
-  const addLiquidityInput: AddLiquidityBoostedProportionalInput = {
-    chainId,
-    rpcUrl,
-    referenceAmount,
-    tokensIn,
-    kind,
-  };
-
   // Query addLiquidity to get the amount of BPT out
   const addLiquidity = new AddLiquidityBoostedV3();
-  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState, await client.getBlockNumber());
+  const input = { chainId, rpcUrl, referenceAmount, tokensIn, kind };
+  const blockNumber = await client.getBlockNumber();
+  const queryOutput = await addLiquidity.query(input, poolState, blockNumber);
 
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({

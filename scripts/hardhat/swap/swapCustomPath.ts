@@ -39,7 +39,8 @@ export async function swapCustomPath() {
   await approveOnToken(waEthLidowETH, PERMIT2[chainId], parseEther('100'));
 
   const swap = new Swap(swapInput);
-  const queryOutput = await swap.query(rpcUrl);
+  const blockNumber = await client.getBlockNumber();
+  const queryOutput = await swap.query(rpcUrl, blockNumber);
 
   const permit2 = await Permit2Helper.signSwapApproval({
     queryOutput,

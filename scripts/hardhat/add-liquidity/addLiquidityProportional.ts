@@ -9,7 +9,6 @@ import {
   Slippage,
   Permit2Helper,
   MAX_UINT256,
-  AddLiquidityProportionalInput,
   PERMIT2,
 } from '@balancer/sdk';
 
@@ -20,7 +19,7 @@ export async function addLiquidityProportional() {
   const [walletClient] = await hre.viem.getWalletClients();
   const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const kind = AddLiquidityKind.Proportional;
+  const kind = AddLiquidityKind.Proportional as const;
   const referenceAmount = {
     rawAmount: parseUnits('10', 18),
     decimals: 18,
@@ -37,20 +36,11 @@ export async function addLiquidityProportional() {
     await approveOnToken(token.address, PERMIT2[chainId], MAX_UINT256);
   }
 
-  const addLiquidityInput: AddLiquidityProportionalInput = {
-    chainId,
-    rpcUrl,
-    kind,
-    referenceAmount,
-  };
-
   // Query addLiquidity to get the amount of BPT out
   const addLiquidity = new AddLiquidity();
-  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState, await client.getBlockNumber());
-
-  console.log('queryOutput', queryOutput);
-
-  console.log(`Expected BPT Out: ${queryOutput.bptOut.amount}`);
+  const input = { chainId, rpcUrl, kind, referenceAmount };
+  const blockNumber = await client.getBlockNumber();
+  const queryOutput = await addLiquidity.query(input, poolState, blockNumber);
 
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityApproval({
@@ -62,12 +52,6 @@ export async function addLiquidityProportional() {
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
-
-  console.log(`Min BPT Out: ${call.minBptOut.amount}`);
-  console.log(
-    `Max Amounts In:`,
-    call.maxAmountsIn.map((t) => t.amount)
-  );
 
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,

@@ -10,7 +10,6 @@ import {
 import hre from 'hardhat';
 
 import {
-  AddLiquidityInput,
   AddLiquidityKind,
   AddLiquidityBoostedV3,
   BalancerApi,
@@ -27,6 +26,7 @@ export async function addLiquidityUnbalancedToERC4626Pool() {
   const client = walletClient.extend(publicActions);
   const chainId = hre.network.config.chainId!;
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
+  const kind = AddLiquidityKind.Unbalanced as const;
   const amountsIn: InputAmount[] = [
     {
       address: wETH, // underlying for waEthLidowETH
@@ -46,26 +46,21 @@ export async function addLiquidityUnbalancedToERC4626Pool() {
     await approveOnToken(token.address, PERMIT2[chainId], token.rawAmount);
   }
 
+  // Use balancer api to fetch pool state
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.boostedPools.fetchPoolStateWithUnderlyings(aaveLidowETHwstETHPool);
 
-  const addLiquidityInput: AddLiquidityInput = {
-    amountsIn,
-    chainId,
-    rpcUrl,
-    kind: AddLiquidityKind.Unbalanced,
-  };
-
   // Query addLiquidity to get the amount of BPT out
-  const blockNumber = await client.getBlockNumber();
   const addLiquidity = new AddLiquidityBoostedV3();
-  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState, blockNumber);
+  const input = { chainId, rpcUrl, kind, amountsIn };
+  const blockNumber = await client.getBlockNumber();
+  const queryOutput = await addLiquidity.query(input, poolState, blockNumber);
 
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
     ...queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 

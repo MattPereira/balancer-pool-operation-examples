@@ -2,14 +2,7 @@ import { parseEther, publicActions } from 'viem';
 import { getBptBalance, aaveLidowETHwstETHPool, waEthLidowETH, logRemoveLiquidityDetails } from '../utils';
 import hre from 'hardhat';
 
-import {
-  RemoveLiquidityKind,
-  RemoveLiquidity,
-  BalancerApi,
-  Slippage,
-  PermitHelper,
-  RemoveLiquiditySingleTokenExactOutInput,
-} from '@balancer/sdk';
+import { RemoveLiquidityKind, RemoveLiquidity, BalancerApi, Slippage, PermitHelper } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts
 export async function removeLiquiditySingleTokenExactOut() {
@@ -18,7 +11,7 @@ export async function removeLiquiditySingleTokenExactOut() {
   const [walletClient] = await hre.viem.getWalletClients();
   const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-  const kind = RemoveLiquidityKind.SingleTokenExactOut;
+  const kind = RemoveLiquidityKind.SingleTokenExactOut as const;
   const amountOut = {
     address: waEthLidowETH,
     decimals: 18,
@@ -26,21 +19,17 @@ export async function removeLiquiditySingleTokenExactOut() {
   };
   const slippage = Slippage.fromPercentage('5'); // 5%
 
-  const input: RemoveLiquiditySingleTokenExactOutInput = {
-    chainId,
-    rpcUrl,
-    kind,
-    amountOut,
-  };
-
+  // Use balancer api to fetch pool state
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
 
   // Query addLiquidity to get the amount of BPT out
   const removeLiquidity = new RemoveLiquidity();
-  const queryOutput = await removeLiquidity.query(input, poolState, await client.getBlockNumber());
+  const input = { chainId, rpcUrl, kind, amountOut };
+  const blockNumber = await client.getBlockNumber();
+  const queryOutput = await removeLiquidity.query(input, poolState, blockNumber);
 
-  // Use helper to create the necessary permit2 signatures
+  // Use helper to create permit signature
   const permit = await PermitHelper.signRemoveLiquidityApproval({
     ...queryOutput,
     slippage,
