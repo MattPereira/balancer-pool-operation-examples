@@ -8,10 +8,7 @@ import {
   AddLiquidityKind,
   AddLiquidityBoostedV3,
   BalancerApi,
-  AddLiquidityBoostedQueryOutput,
   MAX_UINT256,
-  TokenAmount,
-  Token,
 } from '@balancer/sdk';
 
 // Get account #0 some wETH and wstETH
@@ -81,6 +78,7 @@ export async function getBptBalance() {
 
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const tokensIn = [wETH, wstETH];
   const referenceAmount = {
@@ -106,25 +104,16 @@ export async function getBptBalance() {
   } as const;
 
   const addLiquidity = new AddLiquidityBoostedV3();
-  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
-
-  const queryOutputWithAdjustedAmounts: AddLiquidityBoostedQueryOutput = {
-    ...queryOutput,
-    amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
-      const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
-      return TokenAmount.fromRawAmount(token, (amountIn.amount * 200n) / 100n); // add extra 70% to amounts that are used to calculate "MaxAmountsIn" (extra 50% not enough?!?)
-    }),
-  };
+  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState, await client.getBlockNumber());
 
   const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
-    ...queryOutputWithAdjustedAmounts,
+    ...queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 
-  const call = addLiquidity.buildCallWithPermit2({ ...queryOutputWithAdjustedAmounts, slippage }, permit2);
-
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
   await walletClient.sendTransaction({
     account: walletClient.account,
     data: call.callData,

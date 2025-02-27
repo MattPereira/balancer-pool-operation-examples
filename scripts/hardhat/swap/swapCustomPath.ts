@@ -1,15 +1,22 @@
 import hre from 'hardhat';
-import { getPoolTokenBalances, waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool, approveOnToken } from '../utils';
+import {
+  getPoolTokenBalances,
+  waEthLidowETH,
+  waEthLidowstETH,
+  aaveLidowETHwstETHPool,
+  approveOnToken,
+  logSwapDetails,
+} from '../utils';
 import { SwapKind, Swap, Slippage, Permit2Helper, PERMIT2 } from '@balancer/sdk';
 import { parseUnits, parseEther, publicActions } from 'viem';
 
 // npx hardhat run scripts/hardhat/swap/swapCustomPath.ts
 export async function swapCustomPath() {
+  // user defined inputs
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const chainId = hre.network.config.chainId!;
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-
-  // user defined inputs
   const slippage = Slippage.fromPercentage('1');
   const swapInput = {
     chainId,
@@ -34,28 +41,10 @@ export async function swapCustomPath() {
   const swap = new Swap(swapInput);
   const queryOutput = await swap.query(rpcUrl);
 
-  if (queryOutput.swapKind === SwapKind.GivenIn) {
-    console.table([
-      {
-        Type: 'Given Token In',
-        Address: swap.inputAmount.token.address,
-        Amount: swap.inputAmount.amount,
-      },
-    ]);
-  } else {
-    console.table([
-      {
-        Type: 'Expected Amount In',
-        Address: swap.outputAmount.token.address,
-        Amount: swap.outputAmount.amount,
-      },
-    ]);
-  }
-
   const permit2 = await Permit2Helper.signSwapApproval({
     queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 
@@ -67,6 +56,8 @@ export async function swapCustomPath() {
     to: call.to,
     value: call.value,
   });
+
+  logSwapDetails(swap, queryOutput, call);
 
   return hash;
 }

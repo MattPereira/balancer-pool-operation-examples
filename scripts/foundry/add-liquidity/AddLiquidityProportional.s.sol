@@ -20,13 +20,13 @@ contract AddLiquidityProportional is Setup {
         IPermit2(permit2).approve(waEthLidowstETH, router, type(uint160).max, type(uint48).max);
 
         uint256[] memory maxAmountsIn = new uint256[](2);
-        maxAmountsIn[0] = 10e18; // waEthLidowETH
-        maxAmountsIn[1] = 10e18; // waEthLidowstETH
+        maxAmountsIn[0] = 100e18; // waEthLidowETH
+        maxAmountsIn[1] = 100e18; // waEthLidowstETH
 
         uint256[] memory amountsIn = IRouter(router).addLiquidityProportional(
             aaveLidowETHwstETHPool, // pool
             maxAmountsIn,
-            1e18, // exactBptAmountOut
+            10e18, // exactBptAmountOut
             false, // wethIsEth
             "" // userData
         );

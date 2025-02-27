@@ -1,5 +1,12 @@
 import { parseUnits, publicActions } from 'viem';
-import { getPoolTokenBalances, approveOnToken, wETH, wstETH, aaveLidowETHwstETHPool } from '../utils';
+import {
+  getPoolTokenBalances,
+  approveOnToken,
+  wETH,
+  wstETH,
+  aaveLidowETHwstETHPool,
+  logAddLiquidityDetails,
+} from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -16,8 +23,9 @@ import {
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626Pool.ts
 export async function addLiquidityUnbalancedToERC4626Pool() {
   // User defined inputs
-  const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
+  const chainId = hre.network.config.chainId!;
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const amountsIn: InputAmount[] = [
     {
@@ -49,10 +57,9 @@ export async function addLiquidityUnbalancedToERC4626Pool() {
   };
 
   // Query addLiquidity to get the amount of BPT out
+  const blockNumber = await client.getBlockNumber();
   const addLiquidity = new AddLiquidityBoostedV3();
-  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
-
-  console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
+  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState, blockNumber);
 
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityBoostedApproval({
@@ -65,14 +72,14 @@ export async function addLiquidityUnbalancedToERC4626Pool() {
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
 
-  console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
-
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,
     data: call.callData,
     to: call.to,
     value: call.value,
   });
+
+  logAddLiquidityDetails(queryOutput, call);
 
   return hash;
 }

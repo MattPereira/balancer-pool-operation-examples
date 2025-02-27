@@ -1,5 +1,5 @@
 import { parseEther, publicActions } from 'viem';
-import { getBptBalance, aaveLidowETHwstETHPool, waEthLidowETH } from '../utils';
+import { getBptBalance, aaveLidowETHwstETHPool, waEthLidowETH, logRemoveLiquidityDetails } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -16,6 +16,7 @@ export async function removeLiquiditySingleTokenExactOut() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = RemoveLiquidityKind.SingleTokenExactOut;
   const amountOut = {
@@ -37,32 +38,18 @@ export async function removeLiquiditySingleTokenExactOut() {
 
   // Query addLiquidity to get the amount of BPT out
   const removeLiquidity = new RemoveLiquidity();
-  const queryOutput = await removeLiquidity.query(input, poolState);
-
-  console.log('\nRemove Liquidity Query Output:');
-  console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}`);
-  console.table({
-    tokensOut: queryOutput.amountsOut.map((a) => a.token.address),
-    amountsOut: queryOutput.amountsOut.map((a) => a.amount),
-  });
+  const queryOutput = await removeLiquidity.query(input, poolState, await client.getBlockNumber());
 
   // Use helper to create the necessary permit2 signatures
   const permit = await PermitHelper.signRemoveLiquidityApproval({
     ...queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = removeLiquidity.buildCallWithPermit({ ...queryOutput, slippage }, permit);
-
-  console.log('\nWith slippage applied:');
-  console.log(`Max BPT In: ${call.maxBptIn.amount}`);
-  console.table({
-    tokensOut: call.minAmountsOut.map((a) => a.token.address),
-    minAmountsOut: call.minAmountsOut.map((a) => a.amount),
-  });
 
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,
@@ -70,6 +57,8 @@ export async function removeLiquiditySingleTokenExactOut() {
     to: call.to,
     value: call.value,
   });
+
+  logRemoveLiquidityDetails(queryOutput, call);
 
   return hash;
 }

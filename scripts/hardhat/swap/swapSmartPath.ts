@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import { publicActions } from 'viem';
-import { getPoolTokenBalances, waEthLidowETH, waEthLidowstETH, approveOnToken } from '../utils';
+import { getPoolTokenBalances, waEthLidowETH, waEthLidowstETH, approveOnToken, logSwapDetails } from '../utils';
 
 import {
   SwapKind,
@@ -16,11 +16,11 @@ import {
 
 // npx hardhat run scripts/hardhat/swap/swapSmartPath.ts
 export async function swapSmartPath() {
+  // user defined inputs
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const chainId = hre.network.config.chainId!;
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
-
-  // user defined inputs
   const tokenIn = new Token(chainId, waEthLidowETH, 18, 'waEthLidowETH');
   const tokenOut = new Token(chainId, waEthLidowstETH, 18, 'waEthLidowstETH');
   const swapKind = SwapKind.GivenIn;
@@ -41,30 +41,12 @@ export async function swapSmartPath() {
   });
 
   const swap = new Swap({ chainId, paths, swapKind });
-  const queryOutput = await swap.query(rpcUrl);
-
-  if (queryOutput.swapKind === SwapKind.GivenIn) {
-    console.table([
-      {
-        Type: 'Given Token In',
-        Address: swap.inputAmount.token.address,
-        Amount: swap.inputAmount.amount,
-      },
-    ]);
-  } else {
-    console.table([
-      {
-        Type: 'Expected Amount In',
-        Address: swap.outputAmount.token.address,
-        Amount: swap.outputAmount.amount,
-      },
-    ]);
-  }
+  const queryOutput = await swap.query(rpcUrl, await client.getBlockNumber());
 
   const permit2 = await Permit2Helper.signSwapApproval({
     queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 
@@ -76,6 +58,8 @@ export async function swapSmartPath() {
     to: call.to,
     value: call.value,
   });
+
+  logSwapDetails(swap, queryOutput, call);
 
   return hash;
 }

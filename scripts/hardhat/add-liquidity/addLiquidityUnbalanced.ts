@@ -1,5 +1,12 @@
 import { parseUnits, publicActions } from 'viem';
-import { getPoolTokenBalances, approveOnToken, waEthLidowETH, waEthLidowstETH, aaveLidowETHwstETHPool } from '../utils';
+import {
+  getPoolTokenBalances,
+  approveOnToken,
+  waEthLidowETH,
+  waEthLidowstETH,
+  aaveLidowETHwstETHPool,
+  logAddLiquidityDetails,
+} from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -17,6 +24,7 @@ import {
 export async function addLiquidityUnbalanced() {
   // User defined inputs
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const chainId = hre.network.config.chainId!;
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const amountsIn: InputAmount[] = [
@@ -49,23 +57,20 @@ export async function addLiquidityUnbalanced() {
   };
 
   // Query addLiquidity to get the amount of BPT out
+  const blockNumber = await client.getBlockNumber();
   const addLiquidity = new AddLiquidity();
-  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
-
-  console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
+  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState, blockNumber);
 
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityApproval({
     ...queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
-
-  console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,
@@ -73,6 +78,8 @@ export async function addLiquidityUnbalanced() {
     to: call.to,
     value: call.value,
   });
+
+  logAddLiquidityDetails(queryOutput, call);
 
   return hash;
 }

@@ -1,5 +1,5 @@
 import { parseEther, publicActions } from 'viem';
-import { getBptBalance, aaveLidowETHwstETHPool, waEthLidowETH } from '../utils';
+import { getBptBalance, aaveLidowETHwstETHPool, waEthLidowETH, logRemoveLiquidityDetails } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -16,6 +16,7 @@ export async function removeLiquiditySingleTokenExactIn() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = RemoveLiquidityKind.SingleTokenExactIn;
   const bptIn = {
@@ -37,34 +38,20 @@ export async function removeLiquiditySingleTokenExactIn() {
   const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
   const poolState = await balancerApi.pools.fetchPoolState(aaveLidowETHwstETHPool);
 
-  // Query addLiquidity to get the amount of BPT out
+  // Query removeLiquidity to get the amount of BPT out
   const removeLiquidity = new RemoveLiquidity();
-  const queryOutput = await removeLiquidity.query(input, poolState);
-
-  console.log('\nRemove Liquidity Query Output:');
-  console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}`);
-  console.table({
-    tokensOut: queryOutput.amountsOut.map((a) => a.token.address),
-    amountsOut: queryOutput.amountsOut.map((a) => a.amount),
-  });
+  const queryOutput = await removeLiquidity.query(input, poolState, await client.getBlockNumber());
 
   // Use helper to create the necessary permit2 signatures
   const permit = await PermitHelper.signRemoveLiquidityApproval({
     ...queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
   const call = removeLiquidity.buildCallWithPermit({ ...queryOutput, slippage }, permit);
-
-  console.log('\nWith slippage applied:');
-  console.log(`Max BPT In: ${call.maxBptIn.amount}`);
-  console.table({
-    tokensOut: call.minAmountsOut.map((a) => a.token.address),
-    minAmountsOut: call.minAmountsOut.map((a) => a.amount),
-  });
 
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,
@@ -72,6 +59,8 @@ export async function removeLiquiditySingleTokenExactIn() {
     to: call.to,
     value: call.value,
   });
+
+  logRemoveLiquidityDetails(queryOutput, call);
 
   return hash;
 }

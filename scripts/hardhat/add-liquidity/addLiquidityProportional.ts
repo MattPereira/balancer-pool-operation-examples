@@ -1,5 +1,5 @@
 import { parseUnits, publicActions } from 'viem';
-import { getPoolTokenBalances, approveOnToken, waEthLidowETH, aaveLidowETHwstETHPool } from '../utils';
+import { getPoolTokenBalances, approveOnToken, aaveLidowETHwstETHPool, logAddLiquidityDetails } from '../utils';
 import hre from 'hardhat';
 
 import {
@@ -11,9 +11,6 @@ import {
   MAX_UINT256,
   AddLiquidityProportionalInput,
   PERMIT2,
-  AddLiquidityQueryOutput,
-  TokenAmount,
-  Token,
 } from '@balancer/sdk';
 
 // npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
@@ -21,12 +18,13 @@ export async function addLiquidityProportional() {
   // User defined inputs
   const chainId = hre.network.config.chainId!;
   const [walletClient] = await hre.viem.getWalletClients();
+  const client = walletClient.extend(publicActions);
   const rpcUrl = hre.config.networks.hardhat.forking?.url as string;
   const kind = AddLiquidityKind.Proportional;
   const referenceAmount = {
     rawAmount: parseUnits('10', 18),
     decimals: 18,
-    address: waEthLidowETH,
+    address: aaveLidowETHwstETHPool,
   };
   const slippage = Slippage.fromPercentage('5'); // 5%
 
@@ -48,30 +46,28 @@ export async function addLiquidityProportional() {
 
   // Query addLiquidity to get the amount of BPT out
   const addLiquidity = new AddLiquidity();
-  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
+  const queryOutput = await addLiquidity.query(addLiquidityInput, poolState, await client.getBlockNumber());
 
-  console.log(`Expected BPT Out: ${queryOutput.bptOut.amount.toString()}`);
+  console.log('queryOutput', queryOutput);
 
-  const queryOutputWithAdjustedAmounts: AddLiquidityQueryOutput = {
-    ...queryOutput,
-    amountsIn: queryOutput.amountsIn.map((amountIn: TokenAmount) => {
-      const token = new Token(amountIn.token.chainId, amountIn.token.address, amountIn.token.decimals);
-      return TokenAmount.fromRawAmount(token, (amountIn.amount * 170n) / 100n); // add extra 70% to amounts that are used to calculate "MaxAmountsIn" (extra 50% not enough?!?)
-    }),
-  };
+  console.log(`Expected BPT Out: ${queryOutput.bptOut.amount}`);
 
   // Use helper to create the necessary permit2 signatures
   const permit2 = await Permit2Helper.signAddLiquidityApproval({
-    ...queryOutputWithAdjustedAmounts,
+    ...queryOutput,
     slippage,
-    client: walletClient.extend(publicActions),
+    client,
     owner: walletClient.account,
   });
 
   // Applies slippage to the BPT out amount and constructs the call
-  const call = addLiquidity.buildCallWithPermit2({ ...queryOutputWithAdjustedAmounts, slippage }, permit2);
+  const call = addLiquidity.buildCallWithPermit2({ ...queryOutput, slippage }, permit2);
 
-  console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
+  console.log(`Min BPT Out: ${call.minBptOut.amount}`);
+  console.log(
+    `Max Amounts In:`,
+    call.maxAmountsIn.map((t) => t.amount)
+  );
 
   const hash = await walletClient.sendTransaction({
     account: walletClient.account,
@@ -79,6 +75,8 @@ export async function addLiquidityProportional() {
     to: call.to,
     value: call.value,
   });
+
+  logAddLiquidityDetails(queryOutput, call);
 
   return hash;
 }
