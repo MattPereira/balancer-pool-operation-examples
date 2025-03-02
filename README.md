@@ -41,107 +41,37 @@ forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork
 
 ## Example Scripts
 
-### Add Liquidity
+## Add Liquidity
 
-  <table>
-    <tr>
-      <th>Kind</th>
-      <th>Typescript</th>
-      <th>Solidity</th>
-    </tr>
-    <tr>
-      <th rowspan="2">Proportional</th>
-      <td><a href="scripts/hardhat/add-liquidity/addLiquidityProportional.ts">addLiquidityProportional.ts</a></td>
-      <td><a href="scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol">AddLiquidityProportional.s.sol</a></td>
-    </tr>
-    <tr>
-      <td><a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626.ts">addLiquidityProportionalToERC4626.ts</a></td>
-      <td><a href="scripts/foundry/add-liquidity/AddLiquidityProportionalToERC4626.s.sol">AddLiquidityProportionalToERC4626.s.sol</a></td>
-    </tr>
-    <tr>
-      <th rowspan="2">Unbalanced</th>
-      <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a></td>
-      <td><a href="scripts/foundry/add-liquidity/AddLiquidityUnbalanced.s.sol">AddLiquidityUnbalanced.s.sol</a></td>
-    </tr>
-    <tr>
-      <td><a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a></td>
-      <td><a href="scripts/foundry/add-liquidity/addLiquidityUnbalancedToERC4626.s.sol">AddLiquidityUnbalancedToERC4626.s.sol</a></td>
-    </tr>
-  </table>
+### Proportional
 
-### Remove Liquidity
+- <a href="scripts/hardhat/add-liquidity/addLiquidityProportional.ts">addLiquidityProportional.ts</a>
+- <a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626.ts">addLiquidityProportionalToERC4626.ts</a>
 
-<table>
-  <thead>
-    <th>Kind</th>
-    <th>Typescript</th>
-    <th>Solidity</th>
-  </thead>
-  <tbody>
-    <tr>
-        <th rowspan="2">Proportional</th>
-        <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a></td>
-        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportional.s.sol">RemoveLiquidityProportional.s.sol</a></td>
-    </tr>
-    <tr>
-        <td><a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a></td>
-        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquidityProportionalToERC4626.s.sol">RemoveLiquidityProportionalToERC4626.s.sol</a></td>
-    </tr>
-    <tr>
-        <th>SingleTokenExactIn</th>
-        <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a></td>
-        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactIn.s.sol">RemoveLiquiditySingleTokenExactIn.s.sol</a></td>
-    </tr>
-        <tr>
-        <th>SingleTokenExactOut</th>
-        <td><a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a></td>
-        <td><a href="scripts/foundry/remove-liquidity/RemoveLiquiditySingleTokenExactOut.s.sol">RemoveLiquiditySingleTokenExactOut.s.sol</a></td>
-    </tr>
+### Unbalanced
 
-  </tbody>
-</table>
+- <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a>
+- <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a>
 
-### Swap
+## Remove Liquidity
 
-<table>
-  <tr>
-    <th>Kind</th>
-    <th>TypeScript</th>
-    <th>Solidity</th>
-  </tr>
-  <tr>
-    <th>GivenIn</th>
-    <td>swapSingleTokenExactIn.ts</td>
-    <td><a href="scripts/foundry/swap/SwapSingleTokenExactIn.s.sol">SwapSingleTokenExactIn.s.sol</a></td>
-  </tr>
-  <tr>
-    <th>GivenOut</th>
-    <td>swapSingleTokenExactOut.ts</td>
-    <td><a href="scripts/foundry/swap/SwapSingleTokenExactOut.s.sol">SwapSingleTokenExactOut.s.sol</a></td>
-  </tr>
-</table>
+### Proportional
 
-### Create
+- <a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a>
+- <a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a>
 
-<table>
-  <tr>
-    <th>Kind</th>
-    <th>TypeScript</th>
-    <th>Solidity</th>
-  </tr>
-  <tr>
-    <th>Stable</th>
-    <td><a href="scripts/hardhat/create/createPoolStable.ts">createPoolStable.ts</a></td>
-    <td>createPoolStable.s.sol</td>
-  </tr>
-  <tr>
-    <th>StableSurge</th>
-    <td><a href="scripts/hardhat/create/createPoolStableSurge.ts">createPoolStableSurge.ts</a></td>
-    <td>createPoolStableSurge.s.sol</td>
-  </tr>
-    <tr>
-    <th>Weighted</th>
-    <td><a href="scripts/hardhat/create/createPoolWeighted.ts">createPoolWeighted.ts</a></td>
-    <td>createPoolWeighted.s.sol</td>
-  </tr>
-</table>
+### SingleToken
+
+- <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a>
+- <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a>
+
+## Swap
+
+- <a href="scripts/hardhat/swap/swapCustomPath.ts">swapCustomPath.ts</a>
+- <a href="scripts/hardhat/swap/swapSmartPath.ts">swapSmartPath.ts</a>
+
+## Create Pool
+
+- <a href="scripts/hardhat/create/createPoolStable.ts">createPoolStable.ts</a>
+- <a href="scripts/hardhat/create/createPoolStableSurge.ts">createPoolStableSurge.ts</a>
+- <a href="scripts/hardhat/create/createPoolWeighted.ts">createPoolWeighted.ts</a>
