@@ -39,7 +39,16 @@ forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork
 
 > \*Foundry script execution requires the `--fork-url mainnet` flag
 
-## Example Scripts
+## Create Pool
+
+- <a href="scripts/hardhat/create/createPoolStable.ts">createPoolStable.ts</a>
+- <a href="scripts/hardhat/create/createPoolStableSurge.ts">createPoolStableSurge.ts</a>
+- <a href="scripts/hardhat/create/createPoolWeighted.ts">createPoolWeighted.ts</a>
+
+## Swap
+
+- <a href="scripts/hardhat/swap/swapCustomPath.ts">swapCustomPath.ts</a>
+- <a href="scripts/hardhat/swap/swapSmartPath.ts">swapSmartPath.ts</a>
 
 ## Add Liquidity
 
@@ -64,14 +73,3 @@ forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork
 
 - <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a>
 - <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a>
-
-## Swap
-
-- <a href="scripts/hardhat/swap/swapCustomPath.ts">swapCustomPath.ts</a>
-- <a href="scripts/hardhat/swap/swapSmartPath.ts">swapSmartPath.ts</a>
-
-## Create Pool
-
-- <a href="scripts/hardhat/create/createPoolStable.ts">createPoolStable.ts</a>
-- <a href="scripts/hardhat/create/createPoolStableSurge.ts">createPoolStableSurge.ts</a>
-- <a href="scripts/hardhat/create/createPoolWeighted.ts">createPoolWeighted.ts</a>
