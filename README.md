@@ -39,37 +39,29 @@ forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork
 
 > \*Foundry script execution requires the `--fork-url mainnet` flag
 
-## Create Pool
+## Example Scripts
+
+### Create Pool
 
 - <a href="scripts/hardhat/create/createPoolStable.ts">createPoolStable.ts</a>
 - <a href="scripts/hardhat/create/createPoolStableSurge.ts">createPoolStableSurge.ts</a>
 - <a href="scripts/hardhat/create/createPoolWeighted.ts">createPoolWeighted.ts</a>
 
-## Swap
+### Swap Tokens
 
 - <a href="scripts/hardhat/swap/swapCustomPath.ts">swapCustomPath.ts</a>
 - <a href="scripts/hardhat/swap/swapSmartPath.ts">swapSmartPath.ts</a>
 
-## Add Liquidity
-
-### Proportional
+### Add Liquidity
 
 - <a href="scripts/hardhat/add-liquidity/addLiquidityProportional.ts">addLiquidityProportional.ts</a>
 - <a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626.ts">addLiquidityProportionalToERC4626.ts</a>
-
-### Unbalanced
-
 - <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a>
 - <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a>
 
-## Remove Liquidity
-
-### Proportional
+### Remove Liquidity
 
 - <a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a>
 - <a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a>
-
-### SingleToken
-
 - <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a>
 - <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a>
