@@ -120,3 +120,28 @@ forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork
     <td><a href="scripts/foundry/swap/SwapSingleTokenExactOut.s.sol">SwapSingleTokenExactOut.s.sol</a></td>
   </tr>
 </table>
+
+### Create
+
+<table>
+  <tr>
+    <th>Kind</th>
+    <th>TypeScript</th>
+    <th>Solidity</th>
+  </tr>
+  <tr>
+    <th>Stable</th>
+    <td><a href="scripts/hardhat/create/createPoolStable.ts">createPoolStable.ts</a></td>
+    <td>createPoolStable.s.sol</td>
+  </tr>
+  <tr>
+    <th>StableSurge</th>
+    <td><a href="scripts/hardhat/create/createPoolStableSurge.ts">createPoolStableSurge.ts</a></td>
+    <td>createPoolStableSurge.s.sol</td>
+  </tr>
+    <tr>
+    <th>Weighted</th>
+    <td><a href="scripts/hardhat/create/createPoolWeighted.ts">createPoolWeighted.ts</a></td>
+    <td>createPoolWeighted.s.sol</td>
+  </tr>
+</table>
