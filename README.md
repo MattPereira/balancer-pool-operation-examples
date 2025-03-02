@@ -1,6 +1,6 @@
-# Balancer V3 Pool Operation Examples
+# SDK Examples
 
-A collection of hardhat and foundry scripts for Balancer v3 pool operations. All examples are configured to run on a local fork of Ethereum mainnet and use the [Balancer Aave Lido wETH-wstETH pool](https://balancer.fi/pools/ethereum/v3/0xc4ce391d82d164c166df9c8336ddf84206b2f812)
+A collection of example scripts that illustrate how to use the Balancer SDK to create pools, swap tokens, add liquidity, and remove liquidity. Everything is configured to run on a local fork of Ethereum mainnet and use the [Balancer Aave Lido wETH-wstETH pool](https://balancer.fi/pools/ethereum/v3/0xc4ce391d82d164c166df9c8336ddf84206b2f812)
 
 ## Getting Started
 
