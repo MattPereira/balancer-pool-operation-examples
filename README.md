@@ -10,7 +10,6 @@ A collection of example scripts that illustrate how to use the Balancer SDK to c
 git clone https://github.com/balancer/pool-operation-examples-v3.git
 cd pool-operation-examples-v3
 pnpm install
-forge install
 ```
 
 2. Add a `MAINNET_RPC_URL` to a `.env` file
