@@ -4,13 +4,7 @@ A collection of example scripts that illustrate how to use the Balancer SDK to c
 
 ## Getting Started
 
-1. Ensure you have the latest version of foundry installed
-
-```
-foundryup
-```
-
-2. Clone this repo & install dependencies
+1. Clone this repo & install dependencies
 
 ```
 git clone https://github.com/balancer/pool-operation-examples-v3.git
@@ -19,25 +13,17 @@ pnpm install
 forge install
 ```
 
-3. Add a `MAINNET_RPC_URL` to a `.env` file
+2. Add a `MAINNET_RPC_URL` to a `.env` file
 
 ```
 MAINNET_RPC_URL=
 ```
 
-4. Run an example hardhat script
+3. Run an example script
 
 ```
 npx hardhat run scripts/hardhat/add-liquidity/addLiquidityProportional.ts
 ```
-
-5. Run an example foundry script\*
-
-```
-forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork-url mainnet
-```
-
-> \*Foundry script execution requires the `--fork-url mainnet` flag
 
 ## Example Scripts
 
@@ -55,13 +41,13 @@ forge script scripts/foundry/add-liquidity/AddLiquidityProportional.s.sol --fork
 ### Add Liquidity
 
 - <a href="scripts/hardhat/add-liquidity/addLiquidityProportional.ts">addLiquidityProportional.ts</a>
-- <a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626.ts">addLiquidityProportionalToERC4626.ts</a>
+- <a href="scripts/hardhat/add-liquidity/addLiquidityProportionalToERC4626Pool.ts">addLiquidityProportionalToERC4626.ts</a>
 - <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalanced.ts">addLiquidityUnbalanced.ts</a>
-- <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626.ts">addLiquidityUnbalancedToERC4626.ts</a>
+- <a href="scripts/hardhat/add-liquidity/addLiquidityUnbalancedToERC4626Pool.ts">addLiquidityUnbalancedToERC4626.ts</a>
 
 ### Remove Liquidity
 
 - <a href="scripts/hardhat/remove-liquidity/removeLiquidityProportional.ts">removeLiquidityProportional.ts</a>
-- <a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalToERC4626.ts">removeLiquidityProportionalToERC4626.ts</a>
+- <a href="scripts/hardhat/remove-liquidity/removeLiquidityProportionalFromERC4626Pool.ts">removeLiquidityProportionalFromERC4626Pool.ts</a>
 - <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactIn.ts">removeLiquiditySingleTokenExactIn.ts</a>
 - <a href="scripts/hardhat/remove-liquidity/removeLiquiditySingleTokenExactOut.ts">removeLiquiditySingleTokenExactOut.ts</a>
